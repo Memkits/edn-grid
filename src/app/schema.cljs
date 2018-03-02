@@ -3,4 +3,4 @@
 
 (def config {:storage "workflow"})
 
-(def store {:states {}, :content ""})
+(def store {:states {}, :content "", :page :home})

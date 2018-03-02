@@ -33,7 +33,7 @@
    "beforeunload"
    (fn [] (.setItem js/localStorage (:storage schema/config) (pr-str (:store @*reel)))))
   (let [raw (.getItem js/localStorage (:storage schema/config))]
-    (if (some? raw) (do (dispatch! :hydrate-storage (read-string raw)))))
+    (comment if (some? raw) (do (dispatch! :hydrate-storage (read-string raw)))))
   (println "App started."))
 
 (defn reload! []
