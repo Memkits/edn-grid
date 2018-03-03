@@ -91,7 +91,8 @@
     (comp-sidebar (:page store))
     (case (:page store)
       :home (comp-home (:content store) (:error store))
-      :grid (div {:style {:padding 4, :overflow :auto}} (comp-edn-grid (:data store)))
+      :grid
+        (div {:style {:padding 4, :overflow :auto}} (comp-edn-grid states (:data store)))
       :about (comp-about)
       (<> (str "unknown: " (:page store))))
     (comment comp-inspect "Store" store nil)

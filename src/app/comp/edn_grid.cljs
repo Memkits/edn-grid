@@ -19,74 +19,94 @@
 
 (declare comp-vector)
 
-(declare render-data)
-
-(defn render-data [data]
-  (cond
-    (map? data) (comp-map data)
-    (vector? data) (comp-vector data)
-    (set? data) (comp-set data)
-    (list? data) (comp-list data)
-    (string? data) (<> (pr-str data) {:color (hsl 120 80 50)})
-    (number? data) (<> (pr-str data) {:color :blue})
-    (keyword? data) (<> (pr-str data) {:color (hsl 240 80 76)})
-    (nil? data) (<> "nil" {:color :red})
-    (symbol? data) (<> (pr-str data) {:color :red})
-    (or (= true data) (= false data)) (<> (pr-str data) {:color :blue})
-    :else (<> (pr-str data) {:color :red})))
+(declare comp-data)
 
 (defcomp
  comp-vector
- (data)
+ (states data)
  (div
   {:style ui/row}
   (div {:style {:padding 4}} (<> "[]" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 0 60 90)), :padding 4}}
-   (->> data (map-indexed (fn [idx child] [idx (div {} (render-data child))]))))))
+   (->> data (map-indexed (fn [idx child] [idx (div {} (comp-data states child))]))))))
 
 (defcomp
  comp-set
- (data)
+ (states data)
  (div
   {:style ui/row}
   (div {:style {:padding 4}} (<> "#{}" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 0 170 90)), :padding 4}}
-   (->> data (map-indexed (fn [idx child] [idx (div {} (render-data child))]))))))
+   (->> data (map-indexed (fn [idx child] [idx (div {} (comp-data states child))]))))))
 
 (defcomp
  comp-map
- (data)
- (div
-  {:style ui/row}
-  (div {:style {:padding 4}} (<> "{}" {}))
-  (list->
-   {:style {:display :grid,
-            :grid-template-columns "1fr 100fr",
-            :grid-gap "0px",
-            :border-left (str "1px solid " (hsl 200 80 80))}}
-   (->> data
-        (map
-         (fn [[k child]]
-           [[k (div {:style {:padding 4, :white-space :nowrap}} (render-data k))]
-            [(str k "-value")
-             (div
-              {:style {:padding 4}}
-              (or (render-data child) (<> (str "Special:" (pr-str child)))))]]))
-        (apply concat)))))
+ (states data)
+ (let [state (or (:data states) false)]
+   (div
+    {:style ui/row}
+    (div
+     {:style {:padding 4, :cursor :pointer}, :on-click (fn [e d! m!] (m! (not state)))}
+     (<> "{}" {}))
+    (list->
+     {:style {:display :grid,
+              :grid-template-columns "1fr 100fr",
+              :grid-gap "0px",
+              :border-left (str "1px solid " (hsl 200 80 80))}}
+     (->> data
+          (map
+           (fn [[k child]]
+             [[k
+               (div
+                {:style {:padding 4, :white-space :nowrap}}
+                (cursor-> k comp-data states k))]
+              (let [path (str k "-value")]
+                [path
+                 (if state
+                   (div
+                    {:style {:padding 4}}
+                    (<>
+                     "foled..."
+                     {:background-color (hsl 260 80 80),
+                      :color :white,
+                      :padding "2px 8px",
+                      :display :inline-block,
+                      :border-radius "6px"}))
+                   (div
+                    {:style {:padding 4}}
+                    (or (cursor-> path comp-data states child)
+                        (<> (str "Special:" (pr-str child))))))])]))
+          (apply concat))))))
 
 (defcomp
  comp-list
- (data)
+ (data states)
  (div
   {:style ui/row}
   (div {:style {:padding 4}} (<> "()" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 40 170 90)), :padding 4}}
-   (->> data (map-indexed (fn [idx child] [idx (div {} (render-data child))]))))))
+   (->> data (map-indexed (fn [idx child] [idx (div {} (comp-data states child))]))))))
+
+(defcomp
+ comp-data
+ (states data)
+ (cond
+   (map? data) (comp-map states data)
+   (vector? data) (comp-vector states data)
+   (set? data) (comp-set states data)
+   (list? data) (comp-list states data)
+   (string? data) (<> (pr-str data) {:color (hsl 120 80 50)})
+   (number? data) (<> (pr-str data) {:color :blue})
+   (keyword? data) (<> (pr-str data) {:color (hsl 240 80 76)})
+   (nil? data) (<> "nil" {:color :red})
+   (symbol? data) (<> (pr-str data) {:color :red})
+   (or (= true data) (= false data)) (<> (pr-str data) {:color :blue})
+   :else (<> (pr-str data) {:color :red})))
 
 (defcomp
  comp-edn-grid
- (data)
- (div {:style {:line-height "1.4em", :font-family ui/font-code}} (render-data data)))
+ (states data)
+ (div {:style {:line-height "1.4em", :font-family ui/font-code}} (comp-data states data)))
