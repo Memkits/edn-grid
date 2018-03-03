@@ -43,17 +43,44 @@
     :on-input (action-> :content (:value %e))})
   (div
    {:style {:padding 8}}
-   (button
-    {:style ui/button,
-     :on-click (fn [e d! m!]
-       (try
-        (let [data (read-string content)] (d! :data data))
-        (catch js/Error err (.log js/console err) (d! :error (str err)))))}
-    (<> "Parse"))
-   (=< 8 nil)
+   (div
+    {}
+    (button
+     {:style ui/button,
+      :on-click (fn [e d! m!]
+        (try
+         (let [data (read-string content)] (d! :data data))
+         (catch js/Error err (.log js/console err) (d! :error (str err)))))}
+     (<> "Parse EDN"))
+    (=< 8 nil)
+    (button
+     {:style ui/button,
+      :on-click (fn [e d! m!]
+        (try
+         (let [data (.parse js/JSON content)] (d! :data (js->clj data)))
+         (catch js/Error err (.log js/console err) (d! :error (str err)))))}
+     (<> "Parse JSON")))
    (if (some? error) (<> error {:color :red})))))
 
-(def style-entry (merge ui/center {:font-size 32, :height 48, :width 40, :cursor :pointer}))
+(def style-entry
+  (merge
+   ui/center
+   {:font-size 32, :height 48, :width 40, :cursor :pointer, :color (hsl 0 0 70)}))
+
+(defn render-icon [page icon-name current-page]
+  (div
+   {:style (merge style-entry (if (= page current-page) {:color :white})),
+    :on-click (action-> :page page)}
+   (comp-icon icon-name)))
+
+(defcomp
+ comp-sidebar
+ (page)
+ (div
+  {:style {:background-color (hsl 0 30 40), :color :white}}
+  (render-icon :home :home page)
+  (render-icon :grid :grid page)
+  (render-icon :about :information page)))
 
 (defcomp
  comp-container
@@ -61,11 +88,7 @@
  (let [store (:store reel), states (:states store)]
    (div
     {:style (merge ui/global ui/fullscreen ui/row)}
-    (div
-     {:style {:background-color (hsl 0 30 40), :color :white}}
-     (div {:style style-entry, :on-click (action-> :page :home)} (comp-icon :home))
-     (div {:style style-entry, :on-click (action-> :page :grid)} (comp-icon :grid))
-     (div {:style style-entry, :on-click (action-> :page :about)} (comp-icon :information)))
+    (comp-sidebar (:page store))
     (case (:page store)
       :home (comp-home (:content store) (:error store))
       :grid (div {:style {:padding 4, :overflow :auto}} (comp-edn-grid (:data store)))
