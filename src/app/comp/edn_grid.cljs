@@ -11,15 +11,15 @@
             [respo-ui.comp.icon :refer [comp-icon]]
             [respo.comp.inspect :refer [comp-inspect]]))
 
-(declare render-data)
+(declare comp-list)
 
 (declare comp-map)
 
-(declare comp-vector)
-
 (declare comp-set)
 
-(declare comp-list)
+(declare comp-vector)
+
+(declare render-data)
 
 (defn render-data [data]
   (cond
@@ -40,7 +40,7 @@
  (data)
  (div
   {:style ui/row}
-  (div {:style {:padding 4}} (<> "[]" {:font-family ui/font-code}))
+  (div {:style {:padding 4}} (<> "[]" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 0 60 90)), :padding 4}}
    (->> data (map-indexed (fn [idx child] [idx (div {} (render-data child))]))))))
@@ -50,7 +50,7 @@
  (data)
  (div
   {:style ui/row}
-  (div {:style {:padding 4}} (<> "#{}" {:font-family ui/font-code}))
+  (div {:style {:padding 4}} (<> "#{}" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 0 170 90)), :padding 4}}
    (->> data (map-indexed (fn [idx child] [idx (div {} (render-data child))]))))))
@@ -60,7 +60,7 @@
  (data)
  (div
   {:style ui/row}
-  (div {:style {:padding 4}} (<> "{}" {:font-family ui/font-code}))
+  (div {:style {:padding 4}} (<> "{}" {}))
   (list->
    {:style {:display :grid,
             :grid-template-columns "1fr 100fr",
@@ -69,10 +69,7 @@
    (->> data
         (map
          (fn [[k child]]
-           [[k
-             (div
-              {:style {:padding 4, :white-space :nowrap, :font-family ui/font-code}}
-              (render-data k))]
+           [[k (div {:style {:padding 4, :white-space :nowrap}} (render-data k))]
             [(str k "-value")
              (div
               {:style {:padding 4}}
@@ -84,7 +81,7 @@
  (data)
  (div
   {:style ui/row}
-  (div {:style {:padding 4}} (<> "()" {:font-family ui/font-code}))
+  (div {:style {:padding 4}} (<> "()" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 40 170 90)), :padding 4}}
    (->> data (map-indexed (fn [idx child] [idx (div {} (render-data child))]))))))
@@ -92,4 +89,4 @@
 (defcomp
  comp-edn-grid
  (data)
- (div {:style {:padding 8, :overflow :auto, :line-height "1.4em"}} (render-data data)))
+ (div {:style {:line-height "1.4em", :font-family ui/font-code}} (render-data data)))
