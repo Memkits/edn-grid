@@ -68,8 +68,8 @@
                    (div
                     {:style {:padding 4}}
                     (<>
-                     "foled..."
-                     {:background-color (hsl 260 80 80),
+                     "folded"
+                     {:background-color (hsl 260 50 90),
                       :color :white,
                       :padding "2px 8px",
                       :display :inline-block,
