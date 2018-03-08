@@ -11,6 +11,8 @@
             [respo-ui.comp.icon :refer [comp-icon]]
             [respo.comp.inspect :refer [comp-inspect]]))
 
+(declare comp-data)
+
 (declare comp-list)
 
 (declare comp-map)
@@ -18,8 +20,6 @@
 (declare comp-set)
 
 (declare comp-vector)
-
-(declare comp-data)
 
 (defcomp
  comp-vector
@@ -29,7 +29,8 @@
   (div {:style {:padding 4}} (<> "[]" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 0 60 90)), :padding 4}}
-   (->> data (map-indexed (fn [idx child] [idx (div {} (comp-data states child))]))))))
+   (->> data
+        (map-indexed (fn [idx child] [idx (div {} (cursor-> idx comp-data states child))]))))))
 
 (defcomp
  comp-set
@@ -39,7 +40,8 @@
   (div {:style {:padding 4}} (<> "#{}" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 0 170 90)), :padding 4}}
-   (->> data (map-indexed (fn [idx child] [idx (div {} (comp-data states child))]))))))
+   (->> data
+        (map-indexed (fn [idx child] [idx (div {} (cursor-> idx comp-data states child))]))))))
 
 (defcomp
  comp-map
@@ -88,7 +90,8 @@
   (div {:style {:padding 4}} (<> "()" {}))
   (list->
    {:style {:border-left (str "1px solid " (hsl 40 170 90)), :padding 4}}
-   (->> data (map-indexed (fn [idx child] [idx (div {} (comp-data states child))]))))))
+   (->> data
+        (map-indexed (fn [idx child] [idx (div {} (cursor-> idx comp-data states child))]))))))
 
 (defcomp
  comp-data

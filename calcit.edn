@@ -1948,6 +1948,8 @@
                      "T" {
                       :type :expr, :by "root", :at 1520011286551, :id "SJkXuWPOG"
                       :data {
+                       "D" {:type :leaf, :by "root", :at 1520523863829, :text "cursor->", :id "H1eRIqC0OM"}
+                       "L" {:type :leaf, :by "root", :at 1520523864879, :text "idx", :id "S1-lwcA0_f"}
                        "T" {:type :leaf, :by "root", :at 1520097798820, :text "comp-data", :id "rkeCfOWPdz"}
                        "b" {:type :leaf, :by "root", :at 1520098390670, :text "states", :id "S1eCLh8udz"}
                        "j" {:type :leaf, :by "root", :at 1520011343080, :text "child", :id "BkLLO-Ddf"}
@@ -2639,6 +2641,8 @@
                      "T" {
                       :type :expr, :by "root", :at 1520011286551, :id "SJkXuWPOG"
                       :data {
+                       "D" {:type :leaf, :by "root", :at 1520523850177, :text "cursor->", :id "BJe-UcCCuM"}
+                       "L" {:type :leaf, :by "root", :at 1520523853317, :text "idx", :id "Sy7M85R0uz"}
                        "T" {:type :leaf, :by "root", :at 1520097793880, :text "comp-data", :id "rkeCfOWPdz"}
                        "b" {:type :leaf, :by "root", :at 1520098398096, :text "states", :id "rkgBDhI__M"}
                        "j" {:type :leaf, :by "root", :at 1520011343080, :text "child", :id "BkLLO-Ddf"}
@@ -2822,6 +2826,8 @@
                      "T" {
                       :type :expr, :by "root", :at 1520011286551, :id "SJkXuWPOG"
                       :data {
+                       "D" {:type :leaf, :by "root", :at 1520523794446, :text "cursor->", :id "Byg_f9CCuM"}
+                       "L" {:type :leaf, :by "root", :at 1520523795923, :text "idx", :id "SJifqCC_M"}
                        "T" {:type :leaf, :by "root", :at 1520097790026, :text "comp-data", :id "rkeCfOWPdz"}
                        "b" {:type :leaf, :by "root", :at 1520098405277, :text "states", :id "r1pD38u_f"}
                        "j" {:type :leaf, :by "root", :at 1520011343080, :text "child", :id "BkLLO-Ddf"}
