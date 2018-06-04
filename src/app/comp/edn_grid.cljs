@@ -84,7 +84,7 @@
 
 (defcomp
  comp-list
- (data states)
+ (states data)
  (div
   {:style ui/row}
   (div {:style {:padding 4}} (<> "()" {}))
