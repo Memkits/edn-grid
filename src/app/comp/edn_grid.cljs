@@ -2,13 +2,11 @@
 (ns app.comp.edn-grid
   (:require [hsl.core :refer [hsl]]
             [respo-ui.core :as ui]
-            [respo.macros
+            [respo.core
              :refer
              [defcomp cursor-> action-> mutation-> list-> <> div button textarea span]]
-            [verbosely.core :refer [verbosely!]]
             [respo.comp.space :refer [=<]]
             [respo-md.comp.md :refer [comp-md]]
-            [respo-ui.comp.icon :refer [comp-icon]]
             [respo.comp.inspect :refer [comp-inspect]]))
 
 (declare comp-data)
