@@ -2,14 +2,13 @@
 (ns app.comp.container
   (:require [hsl.core :refer [hsl]]
             [respo-ui.core :as ui]
-            [respo.macros
+            [respo.core
              :refer
              [defcomp cursor-> action-> mutation-> <> div button textarea span]]
-            [verbosely.core :refer [verbosely!]]
             [respo.comp.space :refer [=<]]
             [reel.comp.reel :refer [comp-reel]]
             [respo-md.comp.md :refer [comp-md]]
-            [respo-ui.comp.icon :refer [comp-icon]]
+            [feather.core :refer [comp-i]]
             [respo.comp.inspect :refer [comp-inspect]]
             [app.comp.edn-grid :refer [comp-edn-grid]]
             [respo.comp.space :refer [=<]]
@@ -71,7 +70,7 @@
   (div
    {:style (merge style-entry (if (= page current-page) {:color :white})),
     :on-click (action-> :page page)}
-   (comp-icon icon-name)))
+   (comp-i icon-name 14 (hsl 400 80 80))))
 
 (defcomp
  comp-sidebar
@@ -80,7 +79,7 @@
   {:style {:background-color (hsl 0 30 40), :color :white}}
   (render-icon :home :home page)
   (render-icon :grid :grid page)
-  (render-icon :about :information page)))
+  (render-icon :about :info page)))
 
 (defcomp
  comp-container
