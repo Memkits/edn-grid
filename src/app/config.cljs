@@ -18,6 +18,6 @@
   {:dev-ui "http://localhost:8100/main-fonts.css",
    :release-ui "http://cdn.tiye.me/favored-fonts/main-fonts.css",
    :cdn-url "http://cdn.tiye.me/edn-grid/",
-   :title "Calcit",
-   :icon "http://cdn.tiye.me/logo/mvc-works.png",
-   :storage-key "workflow"})
+   :title "EDN Grid",
+   :icon "http://cdn.tiye.me/logo/memkits.png",
+   :storage-key "edn-grid"})
