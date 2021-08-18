@@ -8,7 +8,7 @@ Demo http://repo.memkits.org/edn-grid/
 
 ### Workflow
 
-Workflow https://github.com/mvc-works/calcit-workflow
+Workflow https://github.com/calcit-lang/respo-calcit-workflow
 
 ### License
 
