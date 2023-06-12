@@ -119,7 +119,7 @@
               (number? data)
                 <> (str data)
                   {} (:color :blue) (:margin "\"0 8px")
-              (keyword? data)
+              (tag? data)
                 <> (str data)
                   {}
                     :color $ hsl 240 80 76
