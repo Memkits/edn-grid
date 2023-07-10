@@ -281,21 +281,22 @@
         |*reel $ quote
           defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
         |dispatch! $ quote
-          defn dispatch! (op op-data) (; println |Dispatch: op)
-            reset! *reel $ reel-updater updater @*reel op op-data
+          defn dispatch! (op) (; println |Dispatch: op)
+            reset! *reel $ reel-updater updater @*reel op
         |main! $ quote
           defn main! ()
             if dev? $ load-console-formatter!
             render-app!
             add-watch *reel :changes $ fn (r p) (render-app!)
             listen-devtools! |a dispatch!
-            .addEventListener js/window |beforeunload $ fn (e)
-              .setItem js/localStorage (:storage schema/config)
+            js/window.addEventListener |beforeunload $ fn (e)
+              js/localStorage.setItem (:storage schema/config)
                 format-cirru-edn $ :store @*reel
             let
-                raw $ .getItem js/localStorage (:storage schema/config)
+                raw $ js/localStorage.getItem (:storage schema/config)
               if (some? raw)
-                do $ dispatch! :hydrate-storage (parse-cirru-edn raw)
+                do $ dispatch!
+                  :: :hydrate-storage $ parse-cirru-edn raw
             println "|App started."
         |mount-target $ quote
           def mount-target $ .querySelector js/document |.app
@@ -331,15 +332,17 @@
     |app.updater $ {}
       :defs $ {}
         |updater $ quote
-          defn updater (store op op-data op-id op-time)
-            case-default op
-              do (println "\"Unknown op:" op) store
-              :states $ update-states store op-data
-              :content $ assoc store :content op-data
-              :data $ -> store (assoc :data op-data) (assoc :error nil) (assoc :page :grid)
-              :error $ assoc store :error op-data
-              :page $ assoc store :page op-data
-              :hydrate-storage op-data
+          defn updater (store op op-id op-time)
+            tag-match op
+                :states cursor s
+                update-states store cursor s
+              (:content t) (assoc store :content t)
+              (:data d)
+                -> store (assoc :data d) (assoc :error nil) (assoc :page :grid)
+              (:error e) (assoc store :error e)
+              (:page p) (assoc store :page p)
+              (:hydrate-storage d) d
+              _ $ do (eprintln "\"Unknown op:" op) store
       :ns $ quote
         ns app.updater $ :require
           [] respo.cursor :refer $ [] update-states
