@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cos-upload-${{ github.repository }}-${{ github.event_name == 'pull_request' && 'pr' || 'production' }}
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-24.04
@@ -37,7 +41,9 @@ jobs:
     - name: Resolve immutable dependencies
       run: |
         set -euo pipefail
-        caps --ci
+        test ! -e compact.cirru
+        test ! -e package.cirru
+        caps --strict --ci
         yarn install --immutable
         caps verify --toolchain
 
@@ -71,6 +77,7 @@ jobs:
       run: |
         set -euo pipefail
         calcit calcit.cirru js
+        node --test scripts/grid-regression.test.mjs
         yarn vite build --base="$VITE_BASE_URL"
         grep -Fq "$VITE_BASE_URL" dist/index.html
 

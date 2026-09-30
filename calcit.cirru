@@ -308,12 +308,11 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.edn-grid
           :require
-            [] respo-ui.core :refer $ [] hsl
-            [] respo-ui.core :as ui
-            [] respo.core :refer $ [] defcomp >> list-> <> div button textarea span
-            [] respo.comp.space :refer $ [] =<
-            [] respo-md.comp.md :refer $ [] comp-md
-            [] respo.comp.inspect :refer $ [] comp-inspect
+            respo-ui.core :refer $ [] hsl
+            respo-ui.core :as ui
+            respo.core :refer $ [] defcomp >> list-> <> div button textarea span
+            respo.comp.space :refer $ [] =<
+            respo.comp.inspect :refer $ [] comp-inspect
     'app.config $ %{} 'FileEntry
       :defs $ {}
         'dev? $ %{} 'CodeEntry (:doc |)
