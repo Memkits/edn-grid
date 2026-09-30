@@ -6,6 +6,22 @@ EDN Grid(Under development)
 
 Demo http://repo.memkits.org/edn-grid/
 
+### Development
+
+Requires Calcit 0.27.0, Caps 0.1.1, Node.js 24 and Yarn 4.18.0.
+
+```bash
+caps --ci
+yarn install --immutable
+calcit calcit.cirru --check-only
+calcit calcit.cirru js
+yarn dev
+```
+
+### Deployment
+
+The workflow builds frontend assets with the `https://cos-sh.tiye.me/Memkits/edn-grid/` base URL and uploads `dist/` to COS. Pull requests use a separate `pr/` prefix. The original `dist/*` rsync deployment to `rsync-user@tiye.me:/web-assets/repo/Memkits/edn-grid` remains unchanged on `main` pushes; COS does not include server code.
+
 ### Workflow
 
 Workflow https://github.com/calcit-lang/respo-calcit-workflow
