@@ -92,6 +92,7 @@ jobs:
             echo "::error title=COS credentials missing::COS_BUCKET, COS_SECRET_ID, and COS_SECRET_KEY are required for production deployment."
             exit 1
           fi
+        fi
 
     - name: Upload and verify frontend assets on COS
       if: steps.cos-credentials.outputs.available == 'true'
