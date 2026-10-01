@@ -11,12 +11,17 @@ Demo http://repo.memkits.org/edn-grid/
 Requires Calcit 0.27.0, Caps 0.1.1, Node.js 24 and Yarn 4.18.0.
 
 ```bash
-caps --ci
+caps --strict --ci
 yarn install --immutable
 calcit calcit.cirru --check-only
 calcit calcit.cirru js
+node --test scripts/grid-regression.test.mjs
 yarn dev
 ```
+
+Only `calcit.cirru` and `deps.cirru` are canonical; do not restore the retired
+`compact.cirru` and `package.cirru` files. Browser helpers use the same js-ffi
+version as Respo/UI/Feather, with the required storage, DOM and event APIs.
 
 ### Deployment
 
