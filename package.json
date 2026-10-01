@@ -4,7 +4,7 @@
   "description": "Experimenting displaying EDN data with grid",
   "main": "index.js",
   "scripts": {
-    "compile": "calcit calcit.cirru js",
+    "compile": "calcit calcit.cirru",
     "build": "yarn compile && vite build --base=${VITE_BASE_URL:-./}",
     "dev": "yarn compile && vite"
   },
