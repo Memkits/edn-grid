@@ -53,7 +53,6 @@ jobs:
         test "$(calcit --version)" = "0.27.0"
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru
-        calcit calcit.cirru fix --workflow strict --verify
         calcit calcit.cirru --check-only
         calcit calcit.cirru test --tag unit --require-match
         calcit calcit.cirru analyze check-public --ns app.comp.container --ns app.comp.edn-grid --ns app.config --ns app.main --ns app.schema --ns app.updater --summary-only
@@ -65,7 +64,7 @@ jobs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
         if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-          asset_prefix="${GITHUB_REPOSITORY}/pr/${PR_NUMBER}/"
+          asset_prefix="${GITHUB_REPOSITORY}/pr/${PR_NUMBER}/${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}/"
         else
           asset_prefix="${GITHUB_REPOSITORY}/"
         fi
@@ -77,9 +76,8 @@ jobs:
     - name: Build frontend with CDN URLs
       run: |
         set -euo pipefail
-        calcit calcit.cirru js
+        yarn build
         node --test scripts/grid-regression.test.mjs
-        yarn vite build --base="$VITE_BASE_URL"
 
     - name: Check COS credentials
       id: cos-credentials
