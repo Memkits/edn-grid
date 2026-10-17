@@ -38,6 +38,7 @@ jobs:
       with:
         tools: calcit,caps
         caps-version: "0.1.1"
+        deps-file: deps.cirru
 
     - name: Resolve immutable dependencies
       run: |
@@ -53,9 +54,9 @@ jobs:
         set -euo pipefail
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru
-        calcit calcit.cirru --check-only
+        calcit calcit.cirru --check-only --all-defs
+        calcit calcit.cirru fix --workflow strict --verify
         calcit calcit.cirru test --tag unit --require-match
-        calcit calcit.cirru analyze check-public --ns app.comp.container --ns app.comp.edn-grid --ns app.config --ns app.main --ns app.schema --ns app.updater --summary-only
 
     - name: Select frontend CDN path
       id: asset-path

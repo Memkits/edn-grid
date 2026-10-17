@@ -1,14 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as c from '../js-out/calcit.core.mjs';
-import { comp_home } from '../js-out/app.comp.container.mjs';
+import { comp_home, comp_container } from '../js-out/app.comp.container.mjs';
 import { comp_list, comp_map, comp_vector, comp_data } from '../js-out/app.comp.edn-grid.mjs';
 import { store } from '../js-out/app.schema.mjs';
 import { updater } from '../js-out/app.updater.mjs';
-import { component_$q_, component_tree } from '../js-out/respo.util.detect.mjs';
+import { component_$q_, component_tree, render_node_value } from '../js-out/respo.util.detect.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
+import { reel } from '../js-out/reel.schema.mjs';
 
-const t = c.init_tags(['event', 'children', 'click', 'input', 'some', 'value', 'content', 'data', 'error', 'page', 'grid', 'states', 'cursor', 'root', 'a']);
+const t = c.init_tags(['event', 'children', 'click', 'input', 'some', 'value', 'content', 'data', 'error', 'page', 'grid', 'states', 'cursor', 'root', 'a', 'node', 'store', 'base']);
 const map = c._$n__$M_;
 const field = (v, k) => c.option_$o_unwrap(c.get(v, k));
 const nth = (v, i) => c.option_$o_unwrap(c.nth(v, i));
@@ -24,7 +25,9 @@ function handler(node, kind, label = '') {
   if (en(children, 0) === t.some) {
     const pairs = c.option_$o_unwrap(children);
     for (let i = 0; i < c.count(pairs); i++) {
-      const found = handler(nth(nth(pairs, i), 1), kind, label);
+      const child = field(nth(pairs, i), t.node);
+      if (en(child, 0) !== t.some) continue;
+      const found = handler(render_node_value(c.option_$o_unwrap(child)), kind, label);
       if (found) return found;
     }
   }
@@ -81,4 +84,12 @@ test('nested collections and scalar values render without runtime Option errors'
   const data = map(t.a, c._$L_('fixture-value', 42, true, null, c._$n__$M_(t.a, 'nested')));
   const html = make_string(comp_data(map(t.cursor, c._$L_()), data));
   for (const value of ['fixture-value', '42', 'true', 'nil', 'nested']) assert.ok(html.includes(value));
+});
+test('mixed numeric, string and Tag state branches survive full grid rendering', () => {
+  const states = map(0, map(t.data, true), 'value-branch', map(t.data, false), t.root, map(t.data, false));
+  const next = c.assoc(c.assoc(c.assoc(store, t.states, states), t.data, map(t.a, c._$L_('mixed-state'))), t.page, t.grid);
+  const html = make_string(comp_container(c.assoc(c.assoc(reel, t.base, next), t.store, next)));
+  assert.ok(html.includes('mixed-state'));
+  assert.equal(field(field(states, 0), t.data), true);
+  assert.equal(field(field(states, 'value-branch'), t.data), false);
 });

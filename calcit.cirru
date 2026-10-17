@@ -25,22 +25,30 @@
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (reel)
             let
-                store $ assert-type (&map:get reel :store) (:: 'Map 'Tag 'Dynamic)
-                states $ assert-type (&map:get store :states) (:: 'Map 'Tag 'Dynamic)
-                page $ assert-type (&map:get store :page) 'Tag
-                content $ assert-type (&map:get store :content) 'String
-                error $ &map:get store :error
-                data $ &map:get store :data
+                store $ decode-map-as
+                  option:unwrap $ get reel :store
+                  :: 'Map 'Tag 'Dynamic
+                states $ decode-map-as
+                  option:unwrap $ get store :states
+                  :: 'Map 'Dynamic 'Dynamic
+                page $ decode-map-as
+                  option:unwrap $ get store :page
+                  , 'Tag
+                content $ decode-map-as
+                  option:unwrap $ get store :content
+                  , 'String
+                error $ option:unwrap-or (get store :error) nil
+                data $ option:unwrap-or (get store :data) nil
               div
                 {} $ :style $ merge ui/global ui/fullscreen ui/row
                 comp-sidebar page
-                case-default page
-                  <> $ str "|unknown: " page
+                match page
                   :home $ comp-home content error
                   :grid $ div
                     {} $ :style $ {} (:padding 4) (:overflow :auto)
                     comp-edn-grid states data
                   :about $ comp-about
+                  _ $ <> $ str "|unknown: " page
                 comp-reel (>> states :reel) reel $ {}
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
@@ -53,9 +61,9 @@
               textarea $ {} (:value content) (:placeholder |Content)
                 :style $ merge ui/textarea ui/flex $ {} (:width 640) (:resize :none) (:font-family ui/font-code) (:flex-shrink 0) (:line-height |1.4em)
                 :on-input $ fn (e d!)
-                  d! $ :: :content $ assert-type
-                    &map:get
-                      assert-type e $ :: 'Map 'Tag 'Dynamic
+                  d! $ :: :content $ decode-map-as
+                    option:unwrap $ get
+                      decode-map-as e $ :: 'Map 'Tag 'Dynamic
                       , :value
                     , 'String
               div
@@ -81,8 +89,7 @@
                             d! $ :: :error message
                     <> "|Parse JSON"
                 if (string? error)
-                  <> (assert-type error 'String)
-                    {} $ :color :red
+                  <> error $ {} $ :color :red
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
             :args $ [] 'String 'Dynamic
@@ -121,13 +128,13 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
-            [] respo-ui.core :refer $ [] hsl
-            [] respo-ui.core :as ui
-            [] respo.core :refer $ [] defcomp >> <> div button textarea span a
-            [] respo.comp.space :refer $ [] =<
-            [] reel.comp.reel :refer $ [] comp-reel
-            [] feather.core :refer $ [] comp-i
-            [] app.comp.edn-grid :refer $ [] comp-edn-grid
+            respo-ui.core :refer $ hsl
+            respo-ui.core :as ui
+            respo.core :refer $ defcomp >> <> div button textarea span a
+            respo.comp.space :refer $ =<
+            reel.comp.reel :refer $ comp-reel
+            feather.core :refer $ comp-i
+            app.comp.edn-grid :refer $ comp-edn-grid
     'app.comp.edn-grid $ %{} 'FileEntry
       :defs $ {}
         'comp-data $ %{} 'CodeEntry (:doc |)
@@ -162,7 +169,7 @@
                 {} $ :color :red
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic
+            :args $ [] (:: 'Map 'Dynamic 'Dynamic) 'Dynamic
             :features $ #{} :js-ffi
         'comp-edn-grid $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-edn-grid (states data)
@@ -171,13 +178,15 @@
               comp-data (>> states :root) data
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic
+            :args $ [] (:: 'Map 'Dynamic 'Dynamic) 'Dynamic
             :features $ #{} :js-ffi
         'comp-list $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-list (states data)
             let
-                cursor $ assert-type (&map:get states :cursor) (:: 'List 'Dynamic)
-                state $ assert-type
+                cursor $ decode-map-as
+                  option:unwrap-or (get states :cursor) ([])
+                  :: 'List 'Dynamic
+                state $ decode-map-as
                   option:unwrap-or (get states :data) false
                   , 'Bool
               div
@@ -202,13 +211,15 @@
                         comp-data (>> states idx) child
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'List 'Dynamic)
+            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'List 'Dynamic)
             :features $ #{} :js-ffi
         'comp-map $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-map (states data)
             let
-                cursor $ assert-type (&map:get states :cursor) (:: 'List 'Dynamic)
-                state $ assert-type
+                cursor $ decode-map-as
+                  option:unwrap-or (get states :cursor) ([])
+                  :: 'List 'Dynamic
+                state $ decode-map-as
                   option:unwrap-or (get states :data) false
                   , 'Bool
               div
@@ -227,22 +238,25 @@
                   list->
                     {} $ :style $ {} (:display :grid) (:grid-template-columns "|1fr 100fr") (:grid-gap |0px)
                       :border-left $ str "|1px solid " $ hsl 200 80 80
-                    &list:concat & $ -> data (.to-list)
-                      map $ fn (pair)
-                        let[] (k child) pair $ []
-                          [] k $ div
-                            {} $ :style $ {} (:padding "|2px 4px") (:white-space :nowrap)
-                            comp-data (>> states k) k
-                          let
-                              path $ str k |-value
-                            [] path $ div
-                              {} $ :style $ {} (:padding "|2px 4px")
-                              or
-                                comp-data (>> states path) child
-                                <> $ str |Special: $ to-lispy-string child
+                    foldl
+                      -> data (.to-list)
+                        map $ fn (pair)
+                          let[] (k child) pair $ []
+                            [] k $ div
+                              {} $ :style $ {} (:padding "|2px 4px") (:white-space :nowrap)
+                              comp-data (>> states k) k
+                            let
+                                path $ str k |-value
+                              [] path $ div
+                                {} $ :style $ {} (:padding "|2px 4px")
+                                or
+                                  comp-data (>> states path) child
+                                  <> $ str |Special: $ to-lispy-string child
+                      []
+                      fn (acc pair) (.concat acc pair)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
+            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
             :features $ #{} :js-ffi
         'comp-set $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-set (states data)
@@ -261,13 +275,15 @@
                       comp-data (>> states idx) child
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'Set 'Dynamic)
+            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Set 'Dynamic)
             :features $ #{} :js-ffi
         'comp-vector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-vector (states data)
             let
-                cursor $ assert-type (&map:get states :cursor) (:: 'List 'Dynamic)
-                state $ assert-type
+                cursor $ decode-map-as
+                  option:unwrap-or (get states :cursor) ([])
+                  :: 'List 'Dynamic
+                state $ decode-map-as
                   option:unwrap-or (get states :data) false
                   , 'Bool
               div
@@ -291,7 +307,7 @@
                       [] idx $ comp-data (>> states idx) child
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'List 'Dynamic)
+            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'List 'Dynamic)
             :features $ #{} :js-ffi
         'style-folded $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-folded
@@ -305,14 +321,13 @@
               :border-radius |2px
               :cursor :pointer
           :examples $ []
+          :schema $ :: 'Map 'Tag 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.edn-grid
           :require
-            respo-ui.core :refer $ [] hsl
+            respo-ui.core :refer $ hsl
             respo-ui.core :as ui
-            respo.core :refer $ [] defcomp >> list-> <> div button textarea span
-            respo.comp.space :refer $ [] =<
-            respo.comp.inspect :refer $ [] comp-inspect
+            respo.core :refer $ defcomp >> list-> <> div
     'app.config $ %{} 'FileEntry
       :defs $ {}
         'dev? $ %{} 'CodeEntry (:doc |)
@@ -330,58 +345,69 @@
     'app.main $ %{} 'FileEntry
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel
+          :code $ quote $ defref *reel
             -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
           :examples $ []
           :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            reset! *reel $ reel-updater updater @*reel op
+            reset! *reel $ reel-updater app.updater/update-wire-store @*reel op
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Enum
+        'dispatch-wire! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dispatch-wire! (op)
+            if (enum? op) (dispatch! op) (raise |Expected-Enum-operation)
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Unit)
+            :args $ [] 'Dynamic
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
             render-app!
-            add-watch *reel :changes $ fn (r p) (render-app!)
-            listen-devtools! |a dispatch!
+            add-watch! *reel :changes $ fn (r p) (render-app!)
+            listen-devtools! |a dispatch-wire!
             js-ffi.browser/add-event-listener! |beforeunload $ fn (_) (persist-storage!)
             match (js-ffi.browser/storage-get |edn-grid)
               (:some raw)
                 match (try-parse-cirru-edn raw)
                   (:ok parsed)
                     if (map? parsed)
-                      dispatch! $ :: :hydrate-storage $ assert-type parsed (:: 'Map 'Tag 'Dynamic)
+                      dispatch! $ :: :hydrate-storage $ decode-map-as parsed (:: 'Map 'Tag 'Dynamic)
                   (:err message) (println |Storage-migration-failed: message)
               (:none) &unit
             println "|App started."
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
             :features $ #{} :js-ffi
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def mount-target
-            option:unwrap $ js-ffi.browser/query-selector |.app
+            option:unwrap $ respo.ffi.browser/query-selector |.app
           :examples $ []
-          :schema $ :: 'js-ffi.browser/DomElementHost
+          :schema $ :: 'respo.dom/DomElement
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! ()
-            js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ assert-type (&map:get @*reel :store) (:: 'Map 'Tag 'Dynamic)
+            js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ decode-map-as
+              option:unwrap $ get @*reel :store
+              :: 'Map 'Tag 'Dynamic
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
             :features $ #{} :js-ffi
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (clear-cache!)
-            reset! *reel $ assert-type (refresh-reel @*reel schema/store updater) (:: 'Map 'Tag 'Dynamic)
+            reset! *reel $ decode-map-as (refresh-reel @*reel schema/store app.updater/update-wire-store) (:: 'Map 'Tag 'Dynamic)
             println "|Code updated."
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            render! mount-target (comp-container @*reel) dispatch!
+            render! mount-target (comp-container @*reel) dispatch-wire!
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -389,14 +415,12 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
-            [] respo.core :refer $ [] render! clear-cache! realize-ssr!
-            [] app.comp.container :refer $ [] comp-container
-            [] app.updater :refer $ [] updater
-            [] app.schema :as schema
-            [] reel.util :refer $ [] listen-devtools!
-            [] reel.core :refer $ [] reel-updater refresh-reel
-            [] reel.schema :as reel-schema
-            [] cljs.reader :refer $ [] read-string
+            respo.core :refer $ render! clear-cache!
+            app.comp.container :refer $ comp-container
+            app.schema :as schema
+            reel.util :refer $ listen-devtools!
+            reel.core :refer $ reel-updater refresh-reel
+            reel.schema :as reel-schema
             app.config :refer $ dev?
     'app.schema $ %{} 'FileEntry
       :defs $ {}
@@ -418,19 +442,37 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
     'app.updater $ %{} 'FileEntry
-      :defs $ {} $ 'updater
-        %{} 'CodeEntry (:doc |)
+      :defs $ {}
+        'update-wire-store $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn update-wire-store (store op op-id op-time)
+            if (enum? op)
+              updater
+                decode-map-as store $ :: 'Map 'Tag 'Dynamic
+                , op (decode-map-as op-id 'String) (decode-map-as op-time 'Number)
+              raise |Expected-Enum-operation
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic
+            :return $ :: 'Map 'Tag 'Dynamic
+        'updater $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
-                assert-type (update-states store cursor s) (:: 'Map 'Tag 'Dynamic)
-              (:content t) (assoc store :content t)
+                decode-map-as
+                  update-states store
+                    decode-map-as cursor $ :: 'List 'Dynamic
+                    , s
+                  :: 'Map 'Tag 'Dynamic
+              (:content t)
+                assoc store :content $ decode-map-as t 'String
               (:data d)
                 -> store (assoc :data d) (assoc :error nil) (assoc :page :grid)
-              (:error e) (assoc store :error e)
-              (:page p) (assoc store :page p)
+              (:error e)
+                assoc store :error $ decode-map-as e 'String
+              (:page p)
+                assoc store :page $ decode-map-as p 'Tag
               (:hydrate-storage d)
-                assert-type d $ :: 'Map 'Tag 'Dynamic
+                decode-map-as d $ :: 'Map 'Tag 'Dynamic
               _ $ do (eprintln "|Unknown op:" op) store
           :examples $ []
           :schema $ :: 'Fn $ {}
@@ -439,48 +481,48 @@
           :tests $ []
             %{} 'TestEntry (:name |content-update)
               :code $ quote $ = |hello
-                assert-type
-                  &map:get
+                decode-map-as
+                  option:unwrap $ get
                     updater app.schema/store (:: :content |hello) |id 0
                     , :content
-                  , String
+                  , 'String
               :tags $ #{} :unit
             %{} 'TestEntry (:name |data-navigation)
               :code $ quote $ = :grid
-                assert-type
-                  &map:get
+                decode-map-as
+                  option:unwrap $ get
                     updater app.schema/store
                       :: :data $ [] 1 2
                       , |id 0
                     , :page
-                  , Tag
+                  , 'Tag
               :tags $ #{} :unit
             %{} 'TestEntry (:name |error-update)
               :code $ quote $ = |invalid
-                assert-type
-                  &map:get
+                decode-map-as
+                  option:unwrap $ get
                     updater app.schema/store (:: :error |invalid) |id 0
                     , :error
-                  , String
+                  , 'String
               :tags $ #{} :unit
             %{} 'TestEntry (:name |page-navigation)
               :code $ quote $ = :about
-                assert-type
-                  &map:get
+                decode-map-as
+                  option:unwrap $ get
                     updater app.schema/store (:: :page :about) |id 0
                     , :page
-                  , Tag
+                  , 'Tag
               :tags $ #{} :unit
             %{} 'TestEntry (:name |storage-hydration)
               :code $ quote $ = |saved
-                assert-type
-                  &map:get
+                decode-map-as
+                  option:unwrap $ get
                     updater app.schema/store
                       :: :hydrate-storage $ assoc app.schema/store :content |saved
                       , |id 0
                     , :content
-                  , String
+                  , 'String
               :tags $ #{} :unit
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
-          :require $ [] respo.cursor :refer $ [] update-states
+          :require $ respo.cursor :refer $ update-states
