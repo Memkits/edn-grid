@@ -26,21 +26,21 @@
           :code $ quote $ defcomp comp-container (reel)
             let
                 store $ decode-map-as
-                  option:unwrap $ get reel :store
+                  .unwrap $ get reel :store
                   :: 'Map 'Tag 'Dynamic
                 states $ decode-map-as
-                  option:unwrap $ get store :states
+                  .unwrap $ get store :states
                   :: 'Map 'Dynamic 'Dynamic
                 page $ decode-map-as
-                  option:unwrap $ get store :page
+                  .unwrap $ get store :page
                   , 'Tag
                 content $ decode-map-as
-                  option:unwrap $ get store :content
+                  .unwrap $ get store :content
                   , 'String
-                error $ option:unwrap-or (get store :error) nil
-                data $ option:unwrap-or (get store :data) nil
+                error $ .unwrap-or (get store :error) nil
+                data $ .unwrap-or (get store :data) nil
               div
-                {} $ :style $ merge ui/global ui/fullscreen ui/row
+                {} $ :style $ .merge ui/global ui/fullscreen ui/row
                 comp-sidebar page
                 match page
                   :home $ comp-home content error
@@ -57,12 +57,12 @@
         'comp-home $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-home (content error)
             div
-              {} $ :style $ merge ui/flex ui/row
+              {} $ :style $ .merge ui/flex ui/row
               textarea $ {} (:value content) (:placeholder |Content)
-                :style $ merge ui/textarea ui/flex $ {} (:width 640) (:resize :none) (:font-family ui/font-code) (:flex-shrink 0) (:line-height |1.4em)
+                :style $ .merge ui/textarea ui/flex $ {} (:width 640) (:resize :none) (:font-family ui/font-code) (:flex-shrink 0) (:line-height |1.4em)
                 :on-input $ fn (e d!)
                   d! $ :: :content $ decode-map-as
-                    option:unwrap $ get
+                    .unwrap $ get
                       decode-map-as e $ :: 'Map 'Tag 'Dynamic
                       , :value
                     , 'String
@@ -121,7 +121,7 @@
             :features $ #{} :js-ffi
         'style-entry $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-entry
-            merge ui/center $ {} (:font-size 32) (:height 48) (:width 40) (:cursor :pointer)
+            .merge ui/center $ {} (:font-size 32) (:height 48) (:width 40) (:cursor :pointer)
               :color $ hsl 0 0 70
           :examples $ []
           :schema $ :: 'Map 'Tag 'Dynamic
@@ -184,10 +184,10 @@
           :code $ quote $ defcomp comp-list (states data)
             let
                 cursor $ decode-map-as
-                  option:unwrap-or (get states :cursor) ([])
+                  .unwrap-or (get states :cursor) ([])
                   :: 'List 'Dynamic
                 state $ decode-map-as
-                  option:unwrap-or (get states :data) false
+                  .unwrap-or (get states :data) false
                   , 'Bool
               div
                 {} $ :style ui/row
@@ -217,10 +217,10 @@
           :code $ quote $ defcomp comp-map (states data)
             let
                 cursor $ decode-map-as
-                  option:unwrap-or (get states :cursor) ([])
+                  .unwrap-or (get states :cursor) ([])
                   :: 'List 'Dynamic
                 state $ decode-map-as
-                  option:unwrap-or (get states :data) false
+                  .unwrap-or (get states :data) false
                   , 'Bool
               div
                 {} $ :style ui/row
@@ -238,7 +238,7 @@
                   list->
                     {} $ :style $ {} (:display :grid) (:grid-template-columns "|1fr 100fr") (:grid-gap |0px)
                       :border-left $ str "|1px solid " $ hsl 200 80 80
-                    foldl
+                    .foldl
                       -> data (.to-list)
                         map $ fn (pair)
                           let[] (k child) pair $ []
@@ -253,7 +253,13 @@
                                   comp-data (>> states path) child
                                   <> $ str |Special: $ to-lispy-string child
                       []
-                      fn (acc pair) (.concat acc pair)
+                      fn (acc pair)
+                        hint-fn $ {}
+                          :args $ []
+                            :: 'List $ :: 'List 'Dynamic
+                            :: 'List $ :: 'List 'Dynamic
+                          :return $ :: 'List $ :: 'List 'Dynamic
+                        .concat acc pair
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
             :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
@@ -281,10 +287,10 @@
           :code $ quote $ defcomp comp-vector (states data)
             let
                 cursor $ decode-map-as
-                  option:unwrap-or (get states :cursor) ([])
+                  .unwrap-or (get states :cursor) ([])
                   :: 'List 'Dynamic
                 state $ decode-map-as
-                  option:unwrap-or (get states :data) false
+                  .unwrap-or (get states :data) false
                   , 'Bool
               div
                 {} $ :style ui/row
@@ -332,7 +338,7 @@
       :defs $ {}
         'dev? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def dev?
-            = |dev $ option:unwrap-or (get-env |mode) |release
+            = |dev $ .unwrap-or (get-env |mode) |release
           :examples $ []
           :schema $ :: 'Bool
         'site $ %{} 'CodeEntry (:doc |)
@@ -365,18 +371,18 @@
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
-            render-app!
-            add-watch! *reel :changes $ fn (r p) (render-app!)
-            listen-devtools! |a dispatch-wire!
-            js-ffi.browser/add-event-listener! |beforeunload $ fn (_) (persist-storage!)
             match (js-ffi.browser/storage-get |edn-grid)
               (:some raw)
                 match (try-parse-cirru-edn raw)
                   (:ok parsed)
-                    if (map? parsed)
-                      dispatch! $ :: :hydrate-storage $ decode-map-as parsed (:: 'Map 'Tag 'Dynamic)
-                  (:err message) (println |Storage-migration-failed: message)
+                    dispatch! $ :: :hydrate-storage $ decode-map-as parsed (:: 'Map 'Tag 'Dynamic)
+                  (:err message)
+                    raise $ str "|Cannot restore edn-grid; existing archive is kept: " message
               (:none) &unit
+            render-app!
+            add-watch! *reel :changes $ fn (r p) (render-app!)
+            listen-devtools! |a dispatch-wire!
+            js-ffi.browser/add-event-listener! |beforeunload $ fn (_) (persist-storage!)
             println "|App started."
             , &unit
           :examples $ []
@@ -385,13 +391,13 @@
             :features $ #{} :js-ffi
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def mount-target
-            option:unwrap $ respo.ffi.browser/query-selector |.app
+            .unwrap $ respo.ffi.browser/query-selector |.app
           :examples $ []
           :schema $ :: 'respo.dom/DomElement
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! ()
             js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ decode-map-as
-              option:unwrap $ get @*reel :store
+              .unwrap $ get @*reel :store
               :: 'Map 'Tag 'Dynamic
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -480,17 +486,17 @@
             :return $ :: 'Map 'Tag 'Dynamic
           :tests $ []
             %{} 'TestEntry (:name |content-update)
-              :code $ quote $ = |hello
+              :code $ quote $ assert= |hello
                 decode-map-as
-                  option:unwrap $ get
+                  .unwrap $ get
                     updater app.schema/store (:: :content |hello) |id 0
                     , :content
                   , 'String
               :tags $ #{} :unit
             %{} 'TestEntry (:name |data-navigation)
-              :code $ quote $ = :grid
+              :code $ quote $ assert= :grid
                 decode-map-as
-                  option:unwrap $ get
+                  .unwrap $ get
                     updater app.schema/store
                       :: :data $ [] 1 2
                       , |id 0
@@ -498,25 +504,25 @@
                   , 'Tag
               :tags $ #{} :unit
             %{} 'TestEntry (:name |error-update)
-              :code $ quote $ = |invalid
+              :code $ quote $ assert= |invalid
                 decode-map-as
-                  option:unwrap $ get
+                  .unwrap $ get
                     updater app.schema/store (:: :error |invalid) |id 0
                     , :error
                   , 'String
               :tags $ #{} :unit
             %{} 'TestEntry (:name |page-navigation)
-              :code $ quote $ = :about
+              :code $ quote $ assert= :about
                 decode-map-as
-                  option:unwrap $ get
+                  .unwrap $ get
                     updater app.schema/store (:: :page :about) |id 0
                     , :page
                   , 'Tag
               :tags $ #{} :unit
             %{} 'TestEntry (:name |storage-hydration)
-              :code $ quote $ = |saved
+              :code $ quote $ assert= |saved
                 decode-map-as
-                  option:unwrap $ get
+                  .unwrap $ get
                     updater app.schema/store
                       :: :hydrate-storage $ assoc app.schema/store :content |saved
                       , |id 0
