@@ -1,0 +1,3362 @@
+[
+  {
+    "code": [
+      "def",
+      "calcit-dirname",
+      "|"
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.$meta/calcit-dirname",
+    "js_ffi": null,
+    "schema": null,
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "calcit-filename",
+      "|calcit.cirru"
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.$meta/calcit-filename",
+    "js_ffi": null,
+    "schema": null,
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-about",
+      [],
+      [
+        "div",
+        [
+          "{}",
+          [
+            ":style",
+            [
+              "{}",
+              [
+                ":padding",
+                "8"
+              ]
+            ]
+          ]
+        ],
+        [
+          "<>",
+          "|EDN Grid is a tool for displaying deep data. Hosted on Github: "
+        ],
+        [
+          "a",
+          [
+            "{}",
+            [
+              ":href",
+              "|https://github.com/Memkits/edn-grid"
+            ],
+            [
+              ":target",
+              "|_blank"
+            ]
+          ],
+          [
+            "<>",
+            "|Memkits/edn-grid"
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.container/comp-about",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-container",
+      [
+        "reel"
+      ],
+      [
+        "let",
+        [
+          [
+            "store",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap",
+                [
+                  "get",
+                  "reel",
+                  ":store"
+                ]
+              ],
+              [
+                "::",
+                "'Map",
+                "'Tag",
+                "'Dynamic"
+              ]
+            ]
+          ],
+          [
+            "states",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap",
+                [
+                  "get",
+                  "store",
+                  ":states"
+                ]
+              ],
+              [
+                "::",
+                "'Map",
+                "'Dynamic",
+                "'Dynamic"
+              ]
+            ]
+          ],
+          [
+            "page",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap",
+                [
+                  "get",
+                  "store",
+                  ":page"
+                ]
+              ],
+              "'Tag"
+            ]
+          ],
+          [
+            "content",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap",
+                [
+                  "get",
+                  "store",
+                  ":content"
+                ]
+              ],
+              "'String"
+            ]
+          ],
+          [
+            "error",
+            [
+              "option:unwrap-or",
+              [
+                "get",
+                "store",
+                ":error"
+              ],
+              "nil"
+            ]
+          ],
+          [
+            "data",
+            [
+              "option:unwrap-or",
+              [
+                "get",
+                "store",
+                ":data"
+              ],
+              "nil"
+            ]
+          ]
+        ],
+        [
+          "div",
+          [
+            "{}",
+            [
+              ":style",
+              [
+                "merge",
+                "ui/global",
+                "ui/fullscreen",
+                "ui/row"
+              ]
+            ]
+          ],
+          [
+            "comp-sidebar",
+            "page"
+          ],
+          [
+            "match",
+            "page",
+            [
+              ":home",
+              [
+                "comp-home",
+                "content",
+                "error"
+              ]
+            ],
+            [
+              ":grid",
+              [
+                "div",
+                [
+                  "{}",
+                  [
+                    ":style",
+                    [
+                      "{}",
+                      [
+                        ":padding",
+                        "4"
+                      ],
+                      [
+                        ":overflow",
+                        ":auto"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "comp-edn-grid",
+                  "states",
+                  "data"
+                ]
+              ]
+            ],
+            [
+              ":about",
+              [
+                "comp-about"
+              ]
+            ],
+            [
+              "_",
+              [
+                "<>",
+                [
+                  "str",
+                  "|unknown: ",
+                  "page"
+                ]
+              ]
+            ]
+          ],
+          [
+            "comp-reel",
+            [
+              ">>",
+              "states",
+              ":reel"
+            ],
+            "reel",
+            [
+              "{}"
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.container/comp-container",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Tag",
+            "'Dynamic"
+          ]
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-home",
+      [
+        "content",
+        "error"
+      ],
+      [
+        "div",
+        [
+          "{}",
+          [
+            ":style",
+            [
+              "merge",
+              "ui/flex",
+              "ui/row"
+            ]
+          ]
+        ],
+        [
+          "textarea",
+          [
+            "{}",
+            [
+              ":value",
+              "content"
+            ],
+            [
+              ":placeholder",
+              "|Content"
+            ],
+            [
+              ":style",
+              [
+                "merge",
+                "ui/textarea",
+                "ui/flex",
+                [
+                  "{}",
+                  [
+                    ":width",
+                    "640"
+                  ],
+                  [
+                    ":resize",
+                    ":none"
+                  ],
+                  [
+                    ":font-family",
+                    "ui/font-code"
+                  ],
+                  [
+                    ":flex-shrink",
+                    "0"
+                  ],
+                  [
+                    ":line-height",
+                    "|1.4em"
+                  ]
+                ]
+              ]
+            ],
+            [
+              ":on-input",
+              [
+                "fn",
+                [
+                  "e",
+                  "d!"
+                ],
+                [
+                  "d!",
+                  [
+                    "::",
+                    ":content",
+                    [
+                      "decode-map-as",
+                      [
+                        "option:unwrap",
+                        [
+                          "get",
+                          [
+                            "decode-map-as",
+                            "e",
+                            [
+                              "::",
+                              "'Map",
+                              "'Tag",
+                              "'Dynamic"
+                            ]
+                          ],
+                          ":value"
+                        ]
+                      ],
+                      "'String"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "div",
+          [
+            "{}",
+            [
+              ":style",
+              [
+                "{}",
+                [
+                  ":padding",
+                  "8"
+                ]
+              ]
+            ]
+          ],
+          [
+            "div",
+            [
+              "{}"
+            ],
+            [
+              "button",
+              [
+                "{}",
+                [
+                  ":style",
+                  "ui/button"
+                ],
+                [
+                  ":on-click",
+                  [
+                    "fn",
+                    [
+                      "e",
+                      "d!"
+                    ],
+                    [
+                      "match",
+                      [
+                        "try-parse-cirru-edn",
+                        "content"
+                      ],
+                      [
+                        [
+                          ":ok",
+                          "data"
+                        ],
+                        [
+                          "d!",
+                          [
+                            "::",
+                            ":data",
+                            "data"
+                          ]
+                        ]
+                      ],
+                      [
+                        [
+                          ":err",
+                          "message"
+                        ],
+                        [
+                          "d!",
+                          [
+                            "::",
+                            ":error",
+                            "message"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "<>",
+                "|Parse EDN"
+              ]
+            ],
+            [
+              "=<",
+              "8",
+              "nil"
+            ],
+            [
+              "button",
+              [
+                "{}",
+                [
+                  ":style",
+                  "ui/button"
+                ],
+                [
+                  ":on-click",
+                  [
+                    "fn",
+                    [
+                      "e",
+                      "d!"
+                    ],
+                    [
+                      "match",
+                      [
+                        "try-parse-json",
+                        "content"
+                      ],
+                      [
+                        [
+                          ":ok",
+                          "data"
+                        ],
+                        [
+                          "d!",
+                          [
+                            "::",
+                            ":data",
+                            "data"
+                          ]
+                        ]
+                      ],
+                      [
+                        [
+                          ":err",
+                          "message"
+                        ],
+                        [
+                          "d!",
+                          [
+                            "::",
+                            ":error",
+                            "message"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "<>",
+                "|Parse JSON"
+              ]
+            ]
+          ],
+          [
+            "if",
+            [
+              "string?",
+              "error"
+            ],
+            [
+              "<>",
+              "error",
+              [
+                "{}",
+                [
+                  ":color",
+                  ":red"
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.container/comp-home",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          "'String",
+          "'Dynamic"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-sidebar",
+      [
+        "page"
+      ],
+      [
+        "div",
+        [
+          "{}",
+          [
+            ":style",
+            [
+              "{}",
+              [
+                ":background-color",
+                [
+                  "hsl",
+                  "0",
+                  "30",
+                  "40"
+                ]
+              ],
+              [
+                ":color",
+                ":white"
+              ]
+            ]
+          ]
+        ],
+        [
+          "render-icon",
+          ":home",
+          ":home",
+          "page"
+        ],
+        [
+          "render-icon",
+          ":grid",
+          ":grid",
+          "page"
+        ],
+        [
+          "render-icon",
+          ":about",
+          ":info",
+          "page"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.container/comp-sidebar",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          "'Tag"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "render-icon",
+      [
+        "page",
+        "icon-name",
+        "current-page"
+      ],
+      [
+        "div",
+        [
+          "{}",
+          [
+            ":style",
+            [
+              "if",
+              [
+                "=",
+                "page",
+                "current-page"
+              ],
+              [
+                "assoc",
+                "style-entry",
+                ":color",
+                ":white"
+              ],
+              "style-entry"
+            ]
+          ],
+          [
+            ":on-click",
+            [
+              "fn",
+              [
+                "e",
+                "d!"
+              ],
+              [
+                "d!",
+                [
+                  "::",
+                  ":page",
+                  "page"
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "comp-i",
+          "icon-name",
+          "14",
+          [
+            "hsl",
+            "400",
+            "80",
+            "80"
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.container/render-icon",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Element"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          "'Tag",
+          "'Tag",
+          "'Tag"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "style-entry",
+      [
+        "merge",
+        "ui/center",
+        [
+          "{}",
+          [
+            ":font-size",
+            "32"
+          ],
+          [
+            ":height",
+            "48"
+          ],
+          [
+            ":width",
+            "40"
+          ],
+          [
+            ":cursor",
+            ":pointer"
+          ],
+          [
+            ":color",
+            [
+              "hsl",
+              "0",
+              "0",
+              "70"
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.container/style-entry",
+    "js_ffi": null,
+    "schema": [
+      "::",
+      "'Map",
+      "'Tag",
+      "'Dynamic"
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-data",
+      [
+        "states",
+        "data"
+      ],
+      [
+        "cond",
+        [
+          [
+            "map?",
+            "data"
+          ],
+          [
+            "comp-map",
+            "states",
+            "data"
+          ]
+        ],
+        [
+          [
+            "set?",
+            "data"
+          ],
+          [
+            "comp-set",
+            "states",
+            "data"
+          ]
+        ],
+        [
+          [
+            "list?",
+            "data"
+          ],
+          [
+            "comp-list",
+            "states",
+            "data"
+          ]
+        ],
+        [
+          [
+            "string?",
+            "data"
+          ],
+          [
+            "<>",
+            [
+              "to-lispy-string",
+              "data"
+            ],
+            [
+              "{}",
+              [
+                ":color",
+                [
+                  "hsl",
+                  "130",
+                  "80",
+                  "40"
+                ]
+              ],
+              [
+                ":margin",
+                "|0 8px"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "number?",
+            "data"
+          ],
+          [
+            "<>",
+            [
+              "str",
+              "data"
+            ],
+            [
+              "{}",
+              [
+                ":color",
+                ":blue"
+              ],
+              [
+                ":margin",
+                "|0 8px"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "tag?",
+            "data"
+          ],
+          [
+            "<>",
+            [
+              "str",
+              "data"
+            ],
+            [
+              "{}",
+              [
+                ":color",
+                [
+                  "hsl",
+                  "240",
+                  "80",
+                  "76"
+                ]
+              ],
+              [
+                ":margin",
+                "|0 8px"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "nil?",
+            "data"
+          ],
+          [
+            "<>",
+            "|nil",
+            [
+              "{}",
+              [
+                ":color",
+                ":red"
+              ],
+              [
+                ":margin",
+                "|0 8px"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "symbol?",
+            "data"
+          ],
+          [
+            "<>",
+            [
+              "str",
+              "data"
+            ],
+            [
+              "{}",
+              [
+                ":color",
+                ":red"
+              ],
+              [
+                ":margin",
+                "|0 8px"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "or",
+            [
+              "=",
+              "true",
+              "data"
+            ],
+            [
+              "=",
+              "false",
+              "data"
+            ]
+          ],
+          [
+            "<>",
+            [
+              "str",
+              "data"
+            ],
+            [
+              "{}",
+              [
+                ":color",
+                ":blue"
+              ]
+            ]
+          ]
+        ],
+        [
+          "true",
+          [
+            "<>",
+            [
+              "to-lispy-string",
+              "data"
+            ],
+            [
+              "{}",
+              [
+                ":color",
+                ":red"
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.edn-grid/comp-data",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Dynamic",
+            "'Dynamic"
+          ],
+          "'Dynamic"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-edn-grid",
+      [
+        "states",
+        "data"
+      ],
+      [
+        "div",
+        [
+          "{}",
+          [
+            ":style",
+            [
+              "{}",
+              [
+                ":line-height",
+                "|18px"
+              ],
+              [
+                ":font-family",
+                "ui/font-code"
+              ],
+              [
+                ":font-size",
+                "12"
+              ]
+            ]
+          ]
+        ],
+        [
+          "comp-data",
+          [
+            ">>",
+            "states",
+            ":root"
+          ],
+          "data"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.edn-grid/comp-edn-grid",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Dynamic",
+            "'Dynamic"
+          ],
+          "'Dynamic"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-list",
+      [
+        "states",
+        "data"
+      ],
+      [
+        "let",
+        [
+          [
+            "cursor",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap-or",
+                [
+                  "get",
+                  "states",
+                  ":cursor"
+                ],
+                [
+                  "[]"
+                ]
+              ],
+              [
+                "::",
+                "'List",
+                "'Dynamic"
+              ]
+            ]
+          ],
+          [
+            "state",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap-or",
+                [
+                  "get",
+                  "states",
+                  ":data"
+                ],
+                "false"
+              ],
+              "'Bool"
+            ]
+          ]
+        ],
+        [
+          "div",
+          [
+            "{}",
+            [
+              ":style",
+              "ui/row"
+            ]
+          ],
+          [
+            "div",
+            [
+              "{}",
+              [
+                ":style",
+                [
+                  "{}",
+                  [
+                    ":padding",
+                    "|2px 4px"
+                  ],
+                  [
+                    ":cursor",
+                    ":pointer"
+                  ]
+                ]
+              ],
+              [
+                ":on-click",
+                [
+                  "fn",
+                  [
+                    "e",
+                    "d!"
+                  ],
+                  [
+                    "d!",
+                    [
+                      "::",
+                      ":states",
+                      "cursor",
+                      [
+                        "not",
+                        "state"
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                ":inner-text",
+                "|()"
+              ]
+            ]
+          ],
+          [
+            "if",
+            "state",
+            [
+              "div",
+              [
+                "{}",
+                [
+                  ":style",
+                  "style-folded"
+                ],
+                [
+                  ":on-click",
+                  [
+                    "fn",
+                    [
+                      "e",
+                      "d!"
+                    ],
+                    [
+                      "d!",
+                      [
+                        "::",
+                        ":states",
+                        "cursor",
+                        [
+                          "not",
+                          "state"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "<>",
+                "|folded"
+              ]
+            ],
+            [
+              "list->",
+              [
+                "{}",
+                [
+                  ":style",
+                  [
+                    "{}",
+                    [
+                      ":border-left",
+                      [
+                        "str",
+                        "|1px solid ",
+                        [
+                          "hsl",
+                          "40",
+                          "170",
+                          "90"
+                        ]
+                      ]
+                    ],
+                    [
+                      ":padding",
+                      "|2px 4px"
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "->",
+                "data",
+                [
+                  "map-indexed",
+                  [
+                    "fn",
+                    [
+                      "idx",
+                      "child"
+                    ],
+                    [
+                      "[]",
+                      "idx",
+                      [
+                        "div",
+                        [
+                          "{}"
+                        ],
+                        [
+                          "comp-data",
+                          [
+                            ">>",
+                            "states",
+                            "idx"
+                          ],
+                          "child"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.edn-grid/comp-list",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Dynamic",
+            "'Dynamic"
+          ],
+          [
+            "::",
+            "'List",
+            "'Dynamic"
+          ]
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-map",
+      [
+        "states",
+        "data"
+      ],
+      [
+        "let",
+        [
+          [
+            "cursor",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap-or",
+                [
+                  "get",
+                  "states",
+                  ":cursor"
+                ],
+                [
+                  "[]"
+                ]
+              ],
+              [
+                "::",
+                "'List",
+                "'Dynamic"
+              ]
+            ]
+          ],
+          [
+            "state",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap-or",
+                [
+                  "get",
+                  "states",
+                  ":data"
+                ],
+                "false"
+              ],
+              "'Bool"
+            ]
+          ]
+        ],
+        [
+          "div",
+          [
+            "{}",
+            [
+              ":style",
+              "ui/row"
+            ]
+          ],
+          [
+            "div",
+            [
+              "{}",
+              [
+                ":style",
+                [
+                  "{}",
+                  [
+                    ":padding",
+                    "|2px 4px"
+                  ],
+                  [
+                    ":cursor",
+                    ":pointer"
+                  ]
+                ]
+              ],
+              [
+                ":on-click",
+                [
+                  "fn",
+                  [
+                    "e",
+                    "d!"
+                  ],
+                  [
+                    "d!",
+                    [
+                      "::",
+                      ":states",
+                      "cursor",
+                      [
+                        "not",
+                        "state"
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                ":inner-text",
+                "|{}"
+              ]
+            ]
+          ],
+          [
+            "if",
+            "state",
+            [
+              "div",
+              [
+                "{}",
+                [
+                  ":style",
+                  "style-folded"
+                ],
+                [
+                  ":on-click",
+                  [
+                    "fn",
+                    [
+                      "e",
+                      "d!"
+                    ],
+                    [
+                      "d!",
+                      [
+                        "::",
+                        ":states",
+                        "cursor",
+                        [
+                          "not",
+                          "state"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "<>",
+                "|folded"
+              ]
+            ],
+            [
+              "list->",
+              [
+                "{}",
+                [
+                  ":style",
+                  [
+                    "{}",
+                    [
+                      ":display",
+                      ":grid"
+                    ],
+                    [
+                      ":grid-template-columns",
+                      "|1fr 100fr"
+                    ],
+                    [
+                      ":grid-gap",
+                      "|0px"
+                    ],
+                    [
+                      ":border-left",
+                      [
+                        "str",
+                        "|1px solid ",
+                        [
+                          "hsl",
+                          "200",
+                          "80",
+                          "80"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "foldl",
+                [
+                  "->",
+                  "data",
+                  [
+                    ".to-list"
+                  ],
+                  [
+                    "map",
+                    [
+                      "fn",
+                      [
+                        "pair"
+                      ],
+                      [
+                        "let[]",
+                        [
+                          "k",
+                          "child"
+                        ],
+                        "pair",
+                        [
+                          "[]",
+                          [
+                            "[]",
+                            "k",
+                            [
+                              "div",
+                              [
+                                "{}",
+                                [
+                                  ":style",
+                                  [
+                                    "{}",
+                                    [
+                                      ":padding",
+                                      "|2px 4px"
+                                    ],
+                                    [
+                                      ":white-space",
+                                      ":nowrap"
+                                    ]
+                                  ]
+                                ]
+                              ],
+                              [
+                                "comp-data",
+                                [
+                                  ">>",
+                                  "states",
+                                  "k"
+                                ],
+                                "k"
+                              ]
+                            ]
+                          ],
+                          [
+                            "let",
+                            [
+                              [
+                                "path",
+                                [
+                                  "str",
+                                  "k",
+                                  "|-value"
+                                ]
+                              ]
+                            ],
+                            [
+                              "[]",
+                              "path",
+                              [
+                                "div",
+                                [
+                                  "{}",
+                                  [
+                                    ":style",
+                                    [
+                                      "{}",
+                                      [
+                                        ":padding",
+                                        "|2px 4px"
+                                      ]
+                                    ]
+                                  ]
+                                ],
+                                [
+                                  "or",
+                                  [
+                                    "comp-data",
+                                    [
+                                      ">>",
+                                      "states",
+                                      "path"
+                                    ],
+                                    "child"
+                                  ],
+                                  [
+                                    "<>",
+                                    [
+                                      "str",
+                                      "|Special:",
+                                      [
+                                        "to-lispy-string",
+                                        "child"
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "[]"
+                ],
+                [
+                  "fn",
+                  [
+                    "acc",
+                    "pair"
+                  ],
+                  [
+                    ".concat",
+                    "acc",
+                    "pair"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.edn-grid/comp-map",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Dynamic",
+            "'Dynamic"
+          ],
+          [
+            "::",
+            "'Map",
+            "'Dynamic",
+            "'Dynamic"
+          ]
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-set",
+      [
+        "states",
+        "data"
+      ],
+      [
+        "div",
+        [
+          "{}",
+          [
+            ":style",
+            "ui/row"
+          ]
+        ],
+        [
+          "div",
+          [
+            "{}",
+            [
+              ":style",
+              [
+                "{}",
+                [
+                  ":padding",
+                  "|2px 4px"
+                ]
+              ]
+            ],
+            [
+              ":inner-text",
+              "|#{}"
+            ]
+          ]
+        ],
+        [
+          "list->",
+          [
+            "{}",
+            [
+              ":style",
+              [
+                "{}",
+                [
+                  ":border-left",
+                  [
+                    "str",
+                    "|1px solid ",
+                    [
+                      "hsl",
+                      "0",
+                      "170",
+                      "90"
+                    ]
+                  ]
+                ],
+                [
+                  ":padding",
+                  "|2px 4px"
+                ]
+              ]
+            ]
+          ],
+          [
+            "->",
+            "data",
+            [
+              ".to-list"
+            ],
+            [
+              "map-indexed",
+              [
+                "fn",
+                [
+                  "idx",
+                  "child"
+                ],
+                [
+                  "[]",
+                  "idx",
+                  [
+                    "div",
+                    [
+                      "{}"
+                    ],
+                    [
+                      "comp-data",
+                      [
+                        ">>",
+                        "states",
+                        "idx"
+                      ],
+                      "child"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.edn-grid/comp-set",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Dynamic",
+            "'Dynamic"
+          ],
+          [
+            "::",
+            "'Set",
+            "'Dynamic"
+          ]
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defcomp",
+      "comp-vector",
+      [
+        "states",
+        "data"
+      ],
+      [
+        "let",
+        [
+          [
+            "cursor",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap-or",
+                [
+                  "get",
+                  "states",
+                  ":cursor"
+                ],
+                [
+                  "[]"
+                ]
+              ],
+              [
+                "::",
+                "'List",
+                "'Dynamic"
+              ]
+            ]
+          ],
+          [
+            "state",
+            [
+              "decode-map-as",
+              [
+                "option:unwrap-or",
+                [
+                  "get",
+                  "states",
+                  ":data"
+                ],
+                "false"
+              ],
+              "'Bool"
+            ]
+          ]
+        ],
+        [
+          "div",
+          [
+            "{}",
+            [
+              ":style",
+              "ui/row"
+            ]
+          ],
+          [
+            "div",
+            [
+              "{}",
+              [
+                ":style",
+                [
+                  "{}",
+                  [
+                    ":padding",
+                    "|2px 4px"
+                  ],
+                  [
+                    ":cursor",
+                    ":pointer"
+                  ]
+                ]
+              ],
+              [
+                ":inner-text",
+                "|[]"
+              ],
+              [
+                ":on-click",
+                [
+                  "fn",
+                  [
+                    "e",
+                    "d!"
+                  ],
+                  [
+                    "d!",
+                    [
+                      "::",
+                      ":states",
+                      "cursor",
+                      [
+                        "not",
+                        "state"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          [
+            "if",
+            "state",
+            [
+              "div",
+              [
+                "{}",
+                [
+                  ":style",
+                  "style-folded"
+                ],
+                [
+                  ":on-click",
+                  [
+                    "fn",
+                    [
+                      "e",
+                      "d!"
+                    ],
+                    [
+                      "d!",
+                      [
+                        "::",
+                        ":states",
+                        "cursor",
+                        [
+                          "not",
+                          "state"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "<>",
+                "|folded"
+              ]
+            ],
+            [
+              "list->",
+              [
+                "{}",
+                [
+                  ":style",
+                  [
+                    "{}",
+                    [
+                      ":border-left",
+                      [
+                        "str",
+                        "|1px solid ",
+                        [
+                          "hsl",
+                          "0",
+                          "60",
+                          "90"
+                        ]
+                      ]
+                    ],
+                    [
+                      ":padding",
+                      "|2px 4px"
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "->",
+                "data",
+                [
+                  "map-indexed",
+                  [
+                    "fn",
+                    [
+                      "idx",
+                      "child"
+                    ],
+                    [
+                      "[]",
+                      "idx",
+                      [
+                        "comp-data",
+                        [
+                          ">>",
+                          "states",
+                          "idx"
+                        ],
+                        "child"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.edn-grid/comp-vector",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'respo.schema/Component"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Dynamic",
+            "'Dynamic"
+          ],
+          [
+            "::",
+            "'List",
+            "'Dynamic"
+          ]
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "style-folded",
+      [
+        "{}",
+        [
+          ":background-color",
+          [
+            "hsl",
+            "260",
+            "80",
+            "70"
+          ]
+        ],
+        [
+          ":color",
+          ":white"
+        ],
+        [
+          ":padding",
+          "|0px 6px"
+        ],
+        [
+          ":display",
+          ":inline-block"
+        ],
+        [
+          ":line-height",
+          "|20px"
+        ],
+        [
+          ":height",
+          "|20px"
+        ],
+        [
+          ":border-radius",
+          "|2px"
+        ],
+        [
+          ":cursor",
+          ":pointer"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.comp.edn-grid/style-folded",
+    "js_ffi": null,
+    "schema": [
+      "::",
+      "'Map",
+      "'Tag",
+      "'Dynamic"
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "dev?",
+      [
+        "=",
+        "|dev",
+        [
+          "option:unwrap-or",
+          [
+            "get-env",
+            "|mode"
+          ],
+          "|release"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.config/dev?",
+    "js_ffi": null,
+    "schema": "'Bool",
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "site",
+      [
+        "{}",
+        [
+          ":dev-ui",
+          "|http://localhost:8100/main-fonts.css"
+        ],
+        [
+          ":release-ui",
+          "|http://cdn.tiye.me/favored-fonts/main-fonts.css"
+        ],
+        [
+          ":cdn-url",
+          "|https://cos-sh.tiye.me/Memkits/edn-grid/"
+        ],
+        [
+          ":title",
+          "|EDN Grid"
+        ],
+        [
+          ":icon",
+          "|http://cdn.tiye.me/logo/memkits.png"
+        ],
+        [
+          ":storage-key",
+          "|edn-grid"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.config/site",
+    "js_ffi": null,
+    "schema": [
+      "::",
+      "'Map",
+      "'Tag",
+      "'String"
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defref",
+      "*reel",
+      [
+        "->",
+        "reel-schema/reel",
+        [
+          "assoc",
+          ":base",
+          "schema/store"
+        ],
+        [
+          "assoc",
+          ":store",
+          "schema/store"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/*reel",
+    "js_ffi": null,
+    "schema": [
+      "::",
+      "'Ref",
+      [
+        "::",
+        "'Map",
+        "'Tag",
+        "'Dynamic"
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "dispatch!",
+      [
+        "op"
+      ],
+      [
+        "reset!",
+        "*reel",
+        [
+          "reel-updater",
+          "app.updater/update-wire-store",
+          "@*reel",
+          "op"
+        ]
+      ],
+      "&unit"
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/dispatch!",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'Unit"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          "'Enum"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "dispatch-wire!",
+      [
+        "op"
+      ],
+      [
+        "if",
+        [
+          "enum?",
+          "op"
+        ],
+        [
+          "dispatch!",
+          "op"
+        ],
+        [
+          "raise",
+          "|Expected-Enum-operation"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/dispatch-wire!",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'Unit"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          "'Dynamic"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "main!",
+      [],
+      [
+        "if",
+        "dev?",
+        [
+          "load-console-formatter!"
+        ]
+      ],
+      [
+        "render-app!"
+      ],
+      [
+        "add-watch!",
+        "*reel",
+        ":changes",
+        [
+          "fn",
+          [
+            "r",
+            "p"
+          ],
+          [
+            "render-app!"
+          ]
+        ]
+      ],
+      [
+        "listen-devtools!",
+        "|a",
+        "dispatch-wire!"
+      ],
+      [
+        "js-ffi.browser/add-event-listener!",
+        "|beforeunload",
+        [
+          "fn",
+          [
+            "_"
+          ],
+          [
+            "persist-storage!"
+          ]
+        ]
+      ],
+      [
+        "match",
+        [
+          "js-ffi.browser/storage-get",
+          "|edn-grid"
+        ],
+        [
+          [
+            ":some",
+            "raw"
+          ],
+          [
+            "match",
+            [
+              "try-parse-cirru-edn",
+              "raw"
+            ],
+            [
+              [
+                ":ok",
+                "parsed"
+              ],
+              [
+                "if",
+                [
+                  "map?",
+                  "parsed"
+                ],
+                [
+                  "dispatch!",
+                  [
+                    "::",
+                    ":hydrate-storage",
+                    [
+                      "decode-map-as",
+                      "parsed",
+                      [
+                        "::",
+                        "'Map",
+                        "'Tag",
+                        "'Dynamic"
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ],
+            [
+              [
+                ":err",
+                "message"
+              ],
+              [
+                "println",
+                "|Storage-migration-failed:",
+                "message"
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            ":none"
+          ],
+          "&unit"
+        ]
+      ],
+      [
+        "println",
+        "|App started."
+      ],
+      "&unit"
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/main!",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'Unit"
+      ],
+      [
+        ":args",
+        [
+          "[]"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "mount-target",
+      [
+        "option:unwrap",
+        [
+          "respo.ffi.browser/query-selector",
+          "|.app"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/mount-target",
+    "js_ffi": null,
+    "schema": "'respo.dom/DomElement",
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "persist-storage!",
+      [],
+      [
+        "js-ffi.browser/storage-set!",
+        "|edn-grid",
+        [
+          "format-cirru-edn",
+          [
+            "decode-map-as",
+            [
+              "option:unwrap",
+              [
+                "get",
+                "@*reel",
+                ":store"
+              ]
+            ],
+            [
+              "::",
+              "'Map",
+              "'Tag",
+              "'Dynamic"
+            ]
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/persist-storage!",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'Unit"
+      ],
+      [
+        ":args",
+        [
+          "[]"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "reload!",
+      [],
+      [
+        "clear-cache!"
+      ],
+      [
+        "reset!",
+        "*reel",
+        [
+          "decode-map-as",
+          [
+            "refresh-reel",
+            "@*reel",
+            "schema/store",
+            "app.updater/update-wire-store"
+          ],
+          [
+            "::",
+            "'Map",
+            "'Tag",
+            "'Dynamic"
+          ]
+        ]
+      ],
+      [
+        "println",
+        "|Code updated."
+      ],
+      "&unit"
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/reload!",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'Unit"
+      ],
+      [
+        ":args",
+        [
+          "[]"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "render-app!",
+      [],
+      [
+        "render!",
+        "mount-target",
+        [
+          "comp-container",
+          "@*reel"
+        ],
+        "dispatch-wire!"
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.main/render-app!",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":return",
+        "'Unit"
+      ],
+      [
+        ":args",
+        [
+          "[]"
+        ]
+      ],
+      [
+        ":features",
+        [
+          "#{}",
+          ":js-ffi"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "config",
+      [
+        "{}",
+        [
+          ":storage",
+          "|edn-grid"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.schema/config",
+    "js_ffi": null,
+    "schema": [
+      "::",
+      "'Map",
+      "'Tag",
+      "'String"
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "def",
+      "store",
+      [
+        "{}",
+        [
+          ":states",
+          [
+            "{}"
+          ]
+        ],
+        [
+          ":content",
+          "|"
+        ],
+        [
+          ":data",
+          "nil"
+        ],
+        [
+          ":error",
+          "nil"
+        ],
+        [
+          ":page",
+          ":home"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.schema/store",
+    "js_ffi": null,
+    "schema": [
+      "::",
+      "'Map",
+      "'Tag",
+      "'Dynamic"
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "update-wire-store",
+      [
+        "store",
+        "op",
+        "op-id",
+        "op-time"
+      ],
+      [
+        "if",
+        [
+          "enum?",
+          "op"
+        ],
+        [
+          "updater",
+          [
+            "decode-map-as",
+            "store",
+            [
+              "::",
+              "'Map",
+              "'Tag",
+              "'Dynamic"
+            ]
+          ],
+          "op",
+          [
+            "decode-map-as",
+            "op-id",
+            "'String"
+          ],
+          [
+            "decode-map-as",
+            "op-time",
+            "'Number"
+          ]
+        ],
+        [
+          "raise",
+          "|Expected-Enum-operation"
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.updater/update-wire-store",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          "'Dynamic",
+          "'Dynamic",
+          "'Dynamic",
+          "'Dynamic"
+        ]
+      ],
+      [
+        ":return",
+        [
+          "::",
+          "'Map",
+          "'Tag",
+          "'Dynamic"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": []
+  },
+  {
+    "code": [
+      "defn",
+      "updater",
+      [
+        "store",
+        "op",
+        "op-id",
+        "op-time"
+      ],
+      [
+        "match",
+        "op",
+        [
+          [
+            ":states",
+            "cursor",
+            "s"
+          ],
+          [
+            "decode-map-as",
+            [
+              "update-states",
+              "store",
+              [
+                "decode-map-as",
+                "cursor",
+                [
+                  "::",
+                  "'List",
+                  "'Dynamic"
+                ]
+              ],
+              "s"
+            ],
+            [
+              "::",
+              "'Map",
+              "'Tag",
+              "'Dynamic"
+            ]
+          ]
+        ],
+        [
+          [
+            ":content",
+            "t"
+          ],
+          [
+            "assoc",
+            "store",
+            ":content",
+            [
+              "decode-map-as",
+              "t",
+              "'String"
+            ]
+          ]
+        ],
+        [
+          [
+            ":data",
+            "d"
+          ],
+          [
+            "->",
+            "store",
+            [
+              "assoc",
+              ":data",
+              "d"
+            ],
+            [
+              "assoc",
+              ":error",
+              "nil"
+            ],
+            [
+              "assoc",
+              ":page",
+              ":grid"
+            ]
+          ]
+        ],
+        [
+          [
+            ":error",
+            "e"
+          ],
+          [
+            "assoc",
+            "store",
+            ":error",
+            [
+              "decode-map-as",
+              "e",
+              "'String"
+            ]
+          ]
+        ],
+        [
+          [
+            ":page",
+            "p"
+          ],
+          [
+            "assoc",
+            "store",
+            ":page",
+            [
+              "decode-map-as",
+              "p",
+              "'Tag"
+            ]
+          ]
+        ],
+        [
+          [
+            ":hydrate-storage",
+            "d"
+          ],
+          [
+            "decode-map-as",
+            "d",
+            [
+              "::",
+              "'Map",
+              "'Tag",
+              "'Dynamic"
+            ]
+          ]
+        ],
+        [
+          "_",
+          [
+            "do",
+            [
+              "eprintln",
+              "|Unknown op:",
+              "op"
+            ],
+            "store"
+          ]
+        ]
+      ]
+    ],
+    "doc": "",
+    "examples": [],
+    "ffi": null,
+    "ffi_edn": null,
+    "id": "app.updater/updater",
+    "js_ffi": null,
+    "schema": [
+      "{}",
+      [
+        ":kind",
+        ":fn"
+      ],
+      [
+        ":args",
+        [
+          "[]",
+          [
+            "::",
+            "'Map",
+            "'Tag",
+            "'Dynamic"
+          ],
+          "'Enum",
+          "'String",
+          "'Number"
+        ]
+      ],
+      [
+        ":return",
+        [
+          "::",
+          "'Map",
+          "'Tag",
+          "'Dynamic"
+        ]
+      ]
+    ],
+    "tags": [],
+    "tests": [
+      {
+        "code": [
+          "=",
+          "|hello",
+          [
+            "decode-map-as",
+            [
+              "option:unwrap",
+              [
+                "get",
+                [
+                  "updater",
+                  "app.schema/store",
+                  [
+                    "::",
+                    ":content",
+                    "|hello"
+                  ],
+                  "|id",
+                  "0"
+                ],
+                ":content"
+              ]
+            ],
+            "'String"
+          ]
+        ],
+        "name": "content-update",
+        "tags": [
+          "unit"
+        ]
+      },
+      {
+        "code": [
+          "=",
+          ":grid",
+          [
+            "decode-map-as",
+            [
+              "option:unwrap",
+              [
+                "get",
+                [
+                  "updater",
+                  "app.schema/store",
+                  [
+                    "::",
+                    ":data",
+                    [
+                      "[]",
+                      "1",
+                      "2"
+                    ]
+                  ],
+                  "|id",
+                  "0"
+                ],
+                ":page"
+              ]
+            ],
+            "'Tag"
+          ]
+        ],
+        "name": "data-navigation",
+        "tags": [
+          "unit"
+        ]
+      },
+      {
+        "code": [
+          "=",
+          "|invalid",
+          [
+            "decode-map-as",
+            [
+              "option:unwrap",
+              [
+                "get",
+                [
+                  "updater",
+                  "app.schema/store",
+                  [
+                    "::",
+                    ":error",
+                    "|invalid"
+                  ],
+                  "|id",
+                  "0"
+                ],
+                ":error"
+              ]
+            ],
+            "'String"
+          ]
+        ],
+        "name": "error-update",
+        "tags": [
+          "unit"
+        ]
+      },
+      {
+        "code": [
+          "=",
+          ":about",
+          [
+            "decode-map-as",
+            [
+              "option:unwrap",
+              [
+                "get",
+                [
+                  "updater",
+                  "app.schema/store",
+                  [
+                    "::",
+                    ":page",
+                    ":about"
+                  ],
+                  "|id",
+                  "0"
+                ],
+                ":page"
+              ]
+            ],
+            "'Tag"
+          ]
+        ],
+        "name": "page-navigation",
+        "tags": [
+          "unit"
+        ]
+      },
+      {
+        "code": [
+          "=",
+          "|saved",
+          [
+            "decode-map-as",
+            [
+              "option:unwrap",
+              [
+                "get",
+                [
+                  "updater",
+                  "app.schema/store",
+                  [
+                    "::",
+                    ":hydrate-storage",
+                    [
+                      "assoc",
+                      "app.schema/store",
+                      ":content",
+                      "|saved"
+                    ]
+                  ],
+                  "|id",
+                  "0"
+                ],
+                ":content"
+              ]
+            ],
+            "'String"
+          ]
+        ],
+        "name": "storage-hydration",
+        "tags": [
+          "unit"
+        ]
+      }
+    ]
+  }
+]
