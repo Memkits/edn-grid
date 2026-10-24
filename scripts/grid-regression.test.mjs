@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { invoke_method } from '@calcit/procs';
 import * as c from '../js-out/calcit.core.mjs';
 import { comp_home, comp_container } from '../js-out/app.comp.container.mjs';
 import { comp_list, comp_map, comp_vector, comp_data } from '../js-out/app.comp.edn-grid.mjs';
@@ -11,23 +12,23 @@ import { reel } from '../js-out/reel.schema.mjs';
 
 const t = c.init_tags(['event', 'children', 'click', 'input', 'some', 'value', 'content', 'data', 'error', 'page', 'grid', 'states', 'cursor', 'root', 'a', 'node', 'store', 'base']);
 const map = c._$n__$M_;
-const field = (v, k) => c.option_$o_unwrap(c.get(v, k));
-const nth = (v, i) => c.option_$o_unwrap(c.nth(v, i));
+const field = (v, k) => invoke_method('unwrap', c.get(v, k));
+const nth = (v, i) => invoke_method('unwrap', c.nth(v, i));
 const en = c._$n_enum_$o_nth;
 function handler(node, kind, label = '') {
-  if (component_$q_(node)) return handler(c.option_$o_unwrap(component_tree(node)), kind, label);
+  if (component_$q_(node)) return handler(invoke_method('unwrap', component_tree(node)), kind, label);
   const event = c.get(node, t.event);
   if (en(event, 0) === t.some && (!label || make_string(node).includes(label))) {
-    const fn = c.get(c.option_$o_unwrap(event), kind);
-    if (en(fn, 0) === t.some) return c.option_$o_unwrap(fn);
+    const fn = c.get(invoke_method('unwrap', event), kind);
+    if (en(fn, 0) === t.some) return invoke_method('unwrap', fn);
   }
   const children = c.get(node, t.children);
   if (en(children, 0) === t.some) {
-    const pairs = c.option_$o_unwrap(children);
-    for (let i = 0; i < c.count(pairs); i++) {
+    const pairs = invoke_method('unwrap', children);
+    for (let i = 0; i < invoke_method('len', pairs); i++) {
       const child = field(nth(pairs, i), t.node);
       if (en(child, 0) !== t.some) continue;
-      const found = handler(render_node_value(c.option_$o_unwrap(child)), kind, label);
+      const found = handler(render_node_value(invoke_method('unwrap', child)), kind, label);
       if (found) return found;
     }
   }
