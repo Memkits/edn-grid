@@ -6,7 +6,7 @@
     {} (:description |) (:init-fn 'app.main/main!) (:mode :js) (:reload-fn 'app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |respo-feather.calcit/ |js-ffi/
-      :type-slots $ {}
+      :type-slots $ {} $ :dispatch-op 'Dynamic
   :files $ {}
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
@@ -19,9 +19,7 @@
                 {} (:href |https://github.com/Memkits/edn-grid) (:target |_blank)
                 <> |Memkits/edn-grid
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> respo.schema/Component) (:features :js-ffi)
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (reel)
             let
@@ -51,9 +49,7 @@
                   _ $ <> $ str "|unknown: " page
                 comp-reel (>> states :reel) reel $ {}
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] $ :: 'Map 'Tag 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component) (:features :js-ffi)
         'comp-home $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-home (content error)
             div
@@ -91,9 +87,7 @@
                 if (string? error)
                   <> error $ {} $ :color :red
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'String 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn String Dynamic (-> respo.schema/Component) (:features :js-ffi)
         'comp-sidebar $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-sidebar (page)
             div
@@ -104,9 +98,7 @@
               render-icon :grid :grid page
               render-icon :about :info page
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Tag
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn Tag (-> respo.schema/Component) (:features :js-ffi)
         'render-icon $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-icon (page icon-name current-page)
             div
@@ -116,15 +108,13 @@
                   d! $ :: :page page
               comp-i icon-name 14 $ hsl 400 80 80
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Element)
-            :args $ [] 'Tag 'Tag 'Tag
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn Tag Tag Tag (-> respo.schema/Element) (:features :js-ffi)
         'style-entry $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-entry
             .merge ui/center $ {} (:font-size 32) (:height 48) (:width 40) (:cursor :pointer)
               :color $ hsl 0 0 70
           :examples $ []
-          :schema $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Map Tag Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
@@ -168,18 +158,14 @@
               true $ <> (to-lispy-string data)
                 {} $ :color :red
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Dynamic 'Dynamic) 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (Map Dynamic Dynamic) Dynamic (-> respo.schema/Component) (:features :js-ffi)
         'comp-edn-grid $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-edn-grid (states data)
             div
               {} $ :style $ {} (:line-height |18px) (:font-family ui/font-code) (:font-size 12)
               comp-data (>> states :root) data
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Dynamic 'Dynamic) 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (Map Dynamic Dynamic) Dynamic (-> respo.schema/Component) (:features :js-ffi)
         'comp-list $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-list (states data)
             let
@@ -210,9 +196,7 @@
                       [] idx $ div ({})
                         comp-data (>> states idx) child
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'List 'Dynamic)
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Dynamic) (-> respo.schema/Component) (:features :js-ffi)
         'comp-map $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-map (states data)
             let
@@ -254,16 +238,13 @@
                                   <> $ str |Special: $ to-lispy-string child
                       []
                       fn (acc pair)
-                        hint-fn $ {}
-                          :args $ []
-                            :: 'List $ :: 'List 'Dynamic
-                            :: 'List $ :: 'List 'Dynamic
-                          :return $ :: 'List $ :: 'List 'Dynamic
+                        hint-fn $ Fn
+                          List $ List Dynamic
+                          List $ List Dynamic
+                          -> $ List $ List Dynamic
                         .concat acc pair
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo.schema/Component) (:features :js-ffi)
         'comp-set $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-set (states data)
             div
@@ -280,9 +261,7 @@
                     [] idx $ div ({})
                       comp-data (>> states idx) child
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Set 'Dynamic)
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Set Dynamic) (-> respo.schema/Component) (:features :js-ffi)
         'comp-vector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-vector (states data)
             let
@@ -312,9 +291,7 @@
                     -> data $ map-indexed $ fn (idx child)
                       [] idx $ comp-data (>> states idx) child
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'List 'Dynamic)
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Dynamic) (-> respo.schema/Component) (:features :js-ffi)
         'style-folded $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-folded
             {}
@@ -327,7 +304,7 @@
               :border-radius |2px
               :cursor :pointer
           :examples $ []
-          :schema $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Map Tag Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.edn-grid
           :require
@@ -340,12 +317,12 @@
           :code $ quote $ def dev?
             = |dev $ .unwrap-or (get-env |mode) |release
           :examples $ []
-          :schema $ :: 'Bool
+          :schema $ quote Bool
         'site $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def site
             {} (:dev-ui |http://localhost:8100/main-fonts.css) (:release-ui |http://cdn.tiye.me/favored-fonts/main-fonts.css) (:cdn-url |https://cos-sh.tiye.me/Memkits/edn-grid/) (:title "|EDN Grid") (:icon |http://cdn.tiye.me/logo/memkits.png) (:storage-key |edn-grid)
           :examples $ []
-          :schema $ :: 'Map 'Tag 'String
+          :schema $ quote $ Map Tag String
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.config
     'app.main $ %{} 'FileEntry
@@ -354,20 +331,18 @@
           :code $ quote $ defref *reel
             -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
           :examples $ []
-          :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Ref (Map Tag Dynamic)
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
             reset! *reel $ reel-updater app.updater/update-wire-store @*reel op
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Enum
+          :schema $ quote $ Fn Enum (-> Unit)
         'dispatch-wire! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch-wire! (op)
             if (enum? op) (dispatch! op) (raise |Expected-Enum-operation)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic
+          :schema $ quote $ Fn Dynamic (-> Unit)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
@@ -386,38 +361,31 @@
             println "|App started."
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def mount-target
             .unwrap $ respo.ffi.browser/query-selector |.app
           :examples $ []
-          :schema $ :: 'respo.dom/DomElement
+          :schema $ quote respo.dom/DomElement
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! ()
             js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ decode-map-as
               .unwrap $ get @*reel :store
               :: 'Map 'Tag 'Dynamic
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (clear-cache!)
             reset! *reel $ decode-map-as (refresh-reel @*reel schema/store app.updater/update-wire-store) (:: 'Map 'Tag 'Dynamic)
             println "|Code updated."
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
+          :schema $ quote $ Fn (-> Unit)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render! mount-target (comp-container @*reel) dispatch-wire!
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
@@ -434,7 +402,7 @@
           :code $ quote $ def config
             {} $ :storage |edn-grid
           :examples $ []
-          :schema $ :: 'Map 'Tag 'String
+          :schema $ quote $ Map Tag String
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
             {}
@@ -444,7 +412,7 @@
               :error nil
               :page :home
           :examples $ []
-          :schema $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Map Tag Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
     'app.updater $ %{} 'FileEntry
@@ -457,9 +425,8 @@
                 , op (decode-map-as op-id 'String) (decode-map-as op-time 'Number)
               raise |Expected-Enum-operation
           :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic
-            :return $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic
+            -> $ Map Tag Dynamic
         'updater $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-id op-time)
             match op
@@ -481,9 +448,8 @@
                 decode-map-as d $ :: 'Map 'Tag 'Dynamic
               _ $ do (eprintln "|Unknown op:" op) store
           :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Enum 'String 'Number
-            :return $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Fn (Map Tag Dynamic) Enum String Number
+            -> $ Map Tag Dynamic
           :tests $ []
             %{} 'TestEntry (:name |content-update)
               :code $ quote $ assert= |hello
