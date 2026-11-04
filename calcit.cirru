@@ -25,10 +25,10 @@
             let
                 store $ decode-map-as
                   .unwrap $ get reel :store
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
                 states $ decode-map-as
                   .unwrap $ get store :states
-                  :: 'Map 'Dynamic 'Dynamic
+                  quote $ Map Dynamic Dynamic
                 page $ decode-map-as
                   .unwrap $ get store :page
                   , 'Tag
@@ -57,27 +57,32 @@
               textarea $ {} (:value content) (:placeholder |Content)
                 :style $ .merge ui/textarea ui/flex $ {} (:width 640) (:resize :none) (:font-family ui/font-code) (:flex-shrink 0) (:line-height |1.4em)
                 :on-input $ fn (e d!)
-                  d! $ :: :content $ decode-map-as
-                    .unwrap $ get
-                      decode-map-as e $ :: 'Map 'Tag 'Dynamic
-                      , :value
-                    , 'String
+                  hint-fn $ Fn respo.schema/RespoEvent
+                    Fn Enum $ -> Unit
+                    -> Unit
+                  d! $ :: :content $ decode-map-as (:value e) 'String
               div
                 {} $ :style $ {} (:padding 8)
                 div ({})
                   button
                     {} (:style ui/button)
                       :on-click $ fn (e d!)
+                        hint-fn $ Fn respo.schema/RespoEvent
+                          Fn Enum $ -> Unit
+                          -> Unit
                         match (try-parse-cirru-edn content)
                           (:ok data)
                             d! $ :: :data data
                           (:err message)
                             d! $ :: :error message
                     <> "|Parse EDN"
-                  =< 8 nil
+                  space-x 8
                   button
                     {} (:style ui/button)
                       :on-click $ fn (e d!)
+                        hint-fn $ Fn respo.schema/RespoEvent
+                          Fn Enum $ -> Unit
+                          -> Unit
                         match (try-parse-json content)
                           (:ok data)
                             d! $ :: :data data
@@ -85,7 +90,8 @@
                             d! $ :: :error message
                     <> "|Parse JSON"
                 if (string? error)
-                  <> error $ {} $ :color :red
+                  Option :some $ <> error $ {} (:color :red)
+                  Option :none
           :examples $ []
           :schema $ quote $ Fn String Dynamic (-> respo.schema/Component) (:features :js-ffi)
         'comp-sidebar $ %{} 'CodeEntry (:doc |)
@@ -105,6 +111,9 @@
               {}
                 :style $ if (= page current-page) (assoc style-entry :color :white) style-entry
                 :on-click $ fn (e d!)
+                  hint-fn $ Fn respo.schema/RespoEvent
+                    Fn Enum $ -> Unit
+                    -> Unit
                   d! $ :: :page page
               comp-i icon-name 14 $ hsl 400 80 80
           :examples $ []
@@ -121,7 +130,7 @@
             respo-ui.core :refer $ hsl
             respo-ui.core :as ui
             respo.core :refer $ defcomp >> <> div button textarea span a
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x
             reel.comp.reel :refer $ comp-reel
             feather.core :refer $ comp-i
             app.comp.edn-grid :refer $ comp-edn-grid
@@ -171,7 +180,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (get states :cursor) ([])
-                  :: 'List 'Dynamic
+                  quote $ List Dynamic
                 state $ decode-map-as
                   .unwrap-or (get states :data) false
                   , 'Bool
@@ -180,12 +189,18 @@
                 div $ {}
                   :style $ {} (:padding "|2px 4px") (:cursor :pointer)
                   :on-click $ fn (e d!)
+                    hint-fn $ Fn respo.schema/RespoEvent
+                      Fn Enum $ -> Unit
+                      -> Unit
                     d! $ :: :states cursor $ not state
                   :inner-text "|()"
                 if state
                   div
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
+                        hint-fn $ Fn respo.schema/RespoEvent
+                          Fn Enum $ -> Unit
+                          -> Unit
                         d! $ :: :states cursor $ not state
                     <> |folded
                   list->
@@ -202,7 +217,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (get states :cursor) ([])
-                  :: 'List 'Dynamic
+                  quote $ List Dynamic
                 state $ decode-map-as
                   .unwrap-or (get states :data) false
                   , 'Bool
@@ -211,37 +226,48 @@
                 div $ {}
                   :style $ {} (:padding "|2px 4px") (:cursor :pointer)
                   :on-click $ fn (e d!)
+                    hint-fn $ Fn respo.schema/RespoEvent
+                      Fn Enum $ -> Unit
+                      -> Unit
                     d! $ :: :states cursor $ not state
                   :inner-text |{}
                 if state
                   div
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
+                        hint-fn $ Fn respo.schema/RespoEvent
+                          Fn Enum $ -> Unit
+                          -> Unit
                         d! $ :: :states cursor $ not state
                     <> |folded
-                  list->
+                  data-list->
                     {} $ :style $ {} (:display :grid) (:grid-template-columns "|1fr 100fr") (:grid-gap |0px)
                       :border-left $ str "|1px solid " $ hsl 200 80 80
                     .foldl
                       -> data (.to-list)
                         map $ fn (pair)
                           let[] (k child) pair $ []
-                            [] k $ div
-                              {} $ :style $ {} (:padding "|2px 4px") (:white-space :nowrap)
-                              comp-data (>> states k) k
+                            assert-type
+                              [] k $ div
+                                {} $ :style $ {} (:padding "|2px 4px") (:white-space :nowrap)
+                                comp-data (data-states states k) k
+                              quote $ Tuple Dynamic respo.schema/Element
                             let
                                 path $ str k |-value
-                              [] path $ div
-                                {} $ :style $ {} (:padding "|2px 4px")
-                                or
-                                  comp-data (>> states path) child
-                                  <> $ str |Special: $ to-lispy-string child
-                      []
+                              assert-type
+                                [] path $ div
+                                  {} $ :style $ {} (:padding "|2px 4px")
+                                  or
+                                    comp-data (>> states path) child
+                                    <> $ str |Special: $ to-lispy-string child
+                                quote $ Tuple Dynamic respo.schema/Element
+                      assert-type ([])
+                        quote $ List $ Tuple Dynamic respo.schema/Element
                       fn (acc pair)
                         hint-fn $ Fn
-                          List $ List Dynamic
-                          List $ List Dynamic
-                          -> $ List $ List Dynamic
+                          List $ Tuple Dynamic respo.schema/Element
+                          List $ Tuple Dynamic respo.schema/Element
+                          -> $ List $ Tuple Dynamic respo.schema/Element
                         .concat acc pair
           :examples $ []
           :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo.schema/Component) (:features :js-ffi)
@@ -267,7 +293,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (get states :cursor) ([])
-                  :: 'List 'Dynamic
+                  quote $ List Dynamic
                 state $ decode-map-as
                   .unwrap-or (get states :data) false
                   , 'Bool
@@ -277,11 +303,17 @@
                   :style $ {} (:padding "|2px 4px") (:cursor :pointer)
                   :inner-text |[]
                   :on-click $ fn (e d!)
+                    hint-fn $ Fn respo.schema/RespoEvent
+                      Fn Enum $ -> Unit
+                      -> Unit
                     d! $ :: :states cursor $ not state
                 if state
                   div
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
+                        hint-fn $ Fn respo.schema/RespoEvent
+                          Fn Enum $ -> Unit
+                          -> Unit
                         d! $ :: :states cursor $ not state
                     <> |folded
                   list->
@@ -310,7 +342,7 @@
           :require
             respo-ui.core :refer $ hsl
             respo-ui.core :as ui
-            respo.core :refer $ defcomp >> list-> <> div
+            respo.core :refer $ defcomp >> list-> <> div data-states data-list->
     'app.config $ %{} 'FileEntry
       :defs $ {}
         'dev? $ %{} 'CodeEntry (:doc |)
@@ -350,7 +382,8 @@
               (:some raw)
                 match (try-parse-cirru-edn raw)
                   (:ok parsed)
-                    dispatch! $ :: :hydrate-storage $ decode-map-as parsed (:: 'Map 'Tag 'Dynamic)
+                    dispatch! $ :: :hydrate-storage $ decode-map-as parsed
+                      quote $ Map Tag Dynamic
                   (:err message)
                     raise $ str "|Cannot restore edn-grid; existing archive is kept: " message
               (:none) &unit
@@ -371,19 +404,20 @@
           :code $ quote $ defn persist-storage! ()
             js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ decode-map-as
               .unwrap $ get @*reel :store
-              :: 'Map 'Tag 'Dynamic
+              quote $ Map Tag Dynamic
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (clear-cache!)
-            reset! *reel $ decode-map-as (refresh-reel @*reel schema/store app.updater/update-wire-store) (:: 'Map 'Tag 'Dynamic)
+            reset! *reel $ decode-map-as (refresh-reel @*reel schema/store app.updater/update-wire-store)
+              quote $ Map Tag Dynamic
             println "|Code updated."
             , &unit
           :examples $ []
           :schema $ quote $ Fn (-> Unit)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            render! mount-target (comp-container @*reel) dispatch-wire!
+            with-memo-frame $ fn () $ render! mount-target (comp-container @*reel) dispatch-wire!
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
@@ -396,6 +430,7 @@
             reel.core :refer $ reel-updater refresh-reel
             reel.schema :as reel-schema
             app.config :refer $ dev?
+            respo.memo :refer $ with-memo-frame
     'app.schema $ %{} 'FileEntry
       :defs $ {}
         'config $ %{} 'CodeEntry (:doc |)
@@ -421,7 +456,7 @@
           :code $ quote $ defn update-wire-store (store op op-id op-time)
             if (enum? op)
               updater
-                decode-map-as store $ :: 'Map 'Tag 'Dynamic
+                decode-map-as store $ quote $ Map Tag Dynamic
                 , op (decode-map-as op-id 'String) (decode-map-as op-time 'Number)
               raise |Expected-Enum-operation
           :examples $ []
@@ -433,9 +468,9 @@
               (:states cursor s)
                 decode-map-as
                   update-states store
-                    decode-map-as cursor $ :: 'List 'Dynamic
+                    decode-map-as cursor $ quote $ List Dynamic
                     , s
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
               (:content t)
                 assoc store :content $ decode-map-as t 'String
               (:data d)
@@ -445,7 +480,7 @@
               (:page p)
                 assoc store :page $ decode-map-as p 'Tag
               (:hydrate-storage d)
-                decode-map-as d $ :: 'Map 'Tag 'Dynamic
+                decode-map-as d $ quote $ Map Tag Dynamic
               _ $ do (eprintln "|Unknown op:" op) store
           :examples $ []
           :schema $ quote $ Fn (Map Tag Dynamic) Enum String Number
