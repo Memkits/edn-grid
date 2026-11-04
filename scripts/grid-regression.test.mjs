@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import nodeTest from 'node:test';
 import { invoke_method } from '@calcit/procs';
 import * as c from '../js-out/calcit.core.mjs';
 import { comp_home, comp_container } from '../js-out/app.comp.container.mjs';
@@ -8,6 +8,10 @@ import { store } from '../js-out/app.schema.mjs';
 import { updater } from '../js-out/app.updater.mjs';
 import { component_$q_, component_tree, render_node_value } from '../js-out/respo.util.detect.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
+import { event__GT_edn } from '../js-out/respo.util.format.mjs';
+import { with_memo_frame } from '../js-out/respo.memo.mjs';
+
+const test = (name, run) => nodeTest(name, () => with_memo_frame(run));
 import { reel } from '../js-out/reel.schema.mjs';
 
 const t = c.init_tags(['event', 'children', 'click', 'input', 'some', 'value', 'content', 'data', 'error', 'page', 'grid', 'states', 'cursor', 'root', 'a', 'node', 'store', 'base']);
@@ -33,7 +37,7 @@ function handler(node, kind, label = '') {
     }
   }
 }
-function dispatch(fn, event = null) {
+function dispatch(fn, event = event__GT_edn(new Event('click'))) {
   assert.equal(typeof fn, 'function');
   const ops = [];
   fn(event, (...args) => { assert.equal(args.length, 1); ops.push(args[0]); });
@@ -59,7 +63,9 @@ test('invalid JSON dispatches an error without replacing previous data', () => {
   assert.ok(field(next, t.error).length > 0);
 });
 test('text input sends a single content Enum', () => {
-  const op = dispatch(handler(comp_home('', null), t.input), map(t.value, 'fixture'));
+  const native = new Event('input');
+  Object.defineProperty(native, 'target', { value: { value: 'fixture' } });
+  const op = dispatch(handler(comp_home('', null), t.input), event__GT_edn(native));
   assert.equal(field(updater(store, op, 'input', 1), t.content), 'fixture');
 });
 for (const [name, render, data] of [['list', comp_list, c._$L_(1, 2)], ['vector', comp_vector, c._$L_(1, 2)], ['map', comp_map, map(t.a, 1)]]) {
