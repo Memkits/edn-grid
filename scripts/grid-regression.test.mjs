@@ -6,13 +6,13 @@ import { comp_home, comp_container } from '../js-out/app.comp.container.mjs';
 import { comp_list, comp_map, comp_vector, comp_data } from '../js-out/app.comp.edn-grid.mjs';
 import { store } from '../js-out/app.schema.mjs';
 import { updater } from '../js-out/app.updater.mjs';
-import { component_$q_, component_tree, render_node_value } from '../js-out/respo.util.detect.mjs';
+import { as_element, child_pair_value, component_$q_, component_tree, element_children, element_event } from '../js-out/respo.util.detect.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
 import { event__GT_edn } from '../js-out/respo.util.format.mjs';
 import { with_memo_frame } from '../js-out/respo.memo.mjs';
 
 const test = (name, run) => nodeTest(name, () => with_memo_frame(run));
-import { reel } from '../js-out/reel.schema.mjs';
+import { new_reel } from '../js-out/reel.typed.mjs';
 
 const t = c.init_tags(['event', 'children', 'click', 'input', 'some', 'value', 'content', 'data', 'error', 'page', 'grid', 'states', 'cursor', 'root', 'a', 'node', 'store', 'base']);
 const map = c._$n__$M_;
@@ -21,20 +21,15 @@ const nth = (v, i) => invoke_method('unwrap', c.nth(v, i));
 const en = c._$n_enum_$o_nth;
 function handler(node, kind, label = '') {
   if (component_$q_(node)) return handler(invoke_method('unwrap', component_tree(node)), kind, label);
-  const event = c.get(node, t.event);
-  if (en(event, 0) === t.some && (!label || make_string(node).includes(label))) {
-    const fn = c.get(invoke_method('unwrap', event), kind);
+  const element = as_element(node);
+  if (!label || make_string(node).includes(label)) {
+    const fn = c.get(element_event(element), kind);
     if (en(fn, 0) === t.some) return invoke_method('unwrap', fn);
   }
-  const children = c.get(node, t.children);
-  if (en(children, 0) === t.some) {
-    const pairs = invoke_method('unwrap', children);
-    for (let i = 0; i < invoke_method('len', pairs); i++) {
-      const child = field(nth(pairs, i), t.node);
-      if (en(child, 0) !== t.some) continue;
-      const found = handler(render_node_value(invoke_method('unwrap', child)), kind, label);
-      if (found) return found;
-    }
+  const children = element_children(element);
+  for (let i = 0; i < c.count(children); i++) {
+    const found = handler(child_pair_value(nth(children, i)), kind, label);
+    if (found) return found;
   }
 }
 function dispatch(fn, event = event__GT_edn(new Event('click'))) {
@@ -95,7 +90,7 @@ test('nested collections and scalar values render without runtime Option errors'
 test('mixed numeric, string and Tag state branches survive full grid rendering', () => {
   const states = map(0, map(t.data, true), 'value-branch', map(t.data, false), t.root, map(t.data, false));
   const next = c.assoc(c.assoc(c.assoc(store, t.states, states), t.data, map(t.a, c._$L_('mixed-state'))), t.page, t.grid);
-  const html = make_string(comp_container(c.assoc(c.assoc(reel, t.base, next), t.store, next)));
+  const html = make_string(comp_container(new_reel(next)));
   assert.ok(html.includes('mixed-state'));
   assert.equal(field(field(states, 0), t.data), true);
   assert.equal(field(field(states, 'value-branch'), t.data), false);

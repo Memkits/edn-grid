@@ -6,7 +6,7 @@
     {} (:description |) (:init-fn 'app.main/main!) (:mode :js) (:reload-fn 'app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |respo-feather.calcit/ |js-ffi/
-      :type-slots $ {} $ :dispatch-op 'Dynamic
+      :type-slots $ {} $ :dispatch-op |app.schema/DispatchOp
   :files $ {}
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
@@ -23,12 +23,10 @@
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (reel)
             let
-                store $ decode-map-as
-                  .unwrap $ get reel :store
-                  quote $ Map Tag Dynamic
+                store $ :store reel
                 states $ decode-map-as
                   .unwrap $ get store :states
-                  quote $ Map Dynamic Dynamic
+                  Map Dynamic Dynamic
                 page $ decode-map-as
                   .unwrap $ get store :page
                   , 'Tag
@@ -47,9 +45,12 @@
                     comp-edn-grid states data
                   :about $ comp-about
                   _ $ <> $ str "|unknown: " page
-                comp-reel (>> states :reel) reel $ {}
+                comp-typed-reel (>> states :reel) reel $ {}
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn
+            reel.typed/State app.schema/Op $ Map Tag Dynamic
+            -> respo.schema/Component
+            :features :js-ffi
         'comp-home $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-home (content error)
             div
@@ -58,9 +59,9 @@
                 :style $ .merge ui/textarea ui/flex $ {} (:width 640) (:resize :none) (:font-family ui/font-code) (:flex-shrink 0) (:line-height |1.4em)
                 :on-input $ fn (e d!)
                   hint-fn $ Fn respo.schema/RespoEvent
-                    Fn Enum $ -> Unit
+                    Fn AnyEnum $ -> Unit
                     -> Unit
-                  d! $ :: :content $ decode-map-as (:value e) 'String
+                  d! $ app.schema/Op :content $ decode-map-as (:value e) 'String
               div
                 {} $ :style $ {} (:padding 8)
                 div ({})
@@ -68,26 +69,26 @@
                     {} (:style ui/button)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn Enum $ -> Unit
+                          Fn AnyEnum $ -> Unit
                           -> Unit
                         match (try-parse-cirru-edn content)
                           (:ok data)
-                            d! $ :: :data data
+                            d! $ app.schema/Op :data data
                           (:err message)
-                            d! $ :: :error message
+                            d! $ app.schema/Op :error message
                     <> "|Parse EDN"
                   space-x 8
                   button
                     {} (:style ui/button)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn Enum $ -> Unit
+                          Fn AnyEnum $ -> Unit
                           -> Unit
                         match (try-parse-json content)
                           (:ok data)
-                            d! $ :: :data data
+                            d! $ app.schema/Op :data data
                           (:err message)
-                            d! $ :: :error message
+                            d! $ app.schema/Op :error message
                     <> "|Parse JSON"
                 if (string? error)
                   Option :some $ <> error $ {} (:color :red)
@@ -112,9 +113,9 @@
                 :style $ if (= page current-page) (assoc style-entry :color :white) style-entry
                 :on-click $ fn (e d!)
                   hint-fn $ Fn respo.schema/RespoEvent
-                    Fn Enum $ -> Unit
+                    Fn AnyEnum $ -> Unit
                     -> Unit
-                  d! $ :: :page page
+                  d! $ app.schema/Op :page page
               comp-i icon-name 14 $ hsl 400 80 80
           :examples $ []
           :schema $ quote $ Fn Tag Tag Tag (-> respo.schema/Element) (:features :js-ffi)
@@ -131,11 +132,15 @@
             respo-ui.core :as ui
             respo.core :refer $ defcomp >> <> div button textarea span a
             respo.comp.space :refer $ space-x
-            reel.comp.reel :refer $ comp-reel
+            reel.comp.reel :refer $ comp-typed-reel
             feather.core :refer $ comp-i
             app.comp.edn-grid :refer $ comp-edn-grid
     'app.comp.edn-grid $ %{} 'FileEntry
       :defs $ {}
+        'Scalar $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion Scalar String Number Tag Symbol Bool
+          :examples $ []
+          :schema $ quote UnionDef
         'comp-data $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-data (states data)
             cond
@@ -143,27 +148,29 @@
                 comp-map states data
               (set? data) (comp-set states data)
               (list? data) (comp-list states data)
-              (string? data)
-                <> (to-lispy-string data)
-                  {}
-                    :color $ hsl 130 80 40
-                    :margin "|0 8px"
-              (number? data)
-                <> (str data)
-                  {} (:color :blue) (:margin "|0 8px")
-              (tag? data)
-                <> (str data)
-                  {}
-                    :color $ hsl 240 80 76
-                    :margin "|0 8px"
               (nil? data)
                 <> |nil $ {} (:color :red) (:margin "|0 8px")
-              (symbol? data)
-                <> (str data)
-                  {} (:color :red) (:margin "|0 8px")
-              (or (= true data) (= false data))
-                <> (str data)
-                  {} $ :color :blue
+              (or (string? data) (number? data) (tag? data) (symbol? data) (or (= true data) (= false data)))
+                match (decode-map-as data app.comp.edn-grid/Scalar)
+                  (String data)
+                    <> (to-lispy-string data)
+                      {}
+                        :color $ hsl 130 80 40
+                        :margin "|0 8px"
+                  (Number data)
+                    <> (str data)
+                      {} (:color :blue) (:margin "|0 8px")
+                  (Tag data)
+                    <> (str data)
+                      {}
+                        :color $ hsl 240 80 76
+                        :margin "|0 8px"
+                  (Symbol data)
+                    <> (str data)
+                      {} (:color :red) (:margin "|0 8px")
+                  (Bool data)
+                    <> (str data)
+                      {} $ :color :blue
               true $ <> (to-lispy-string data)
                 {} $ :color :red
           :examples $ []
@@ -180,7 +187,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (get states :cursor) ([])
-                  quote $ List Dynamic
+                  List Dynamic
                 state $ decode-map-as
                   .unwrap-or (get states :data) false
                   , 'Bool
@@ -190,18 +197,18 @@
                   :style $ {} (:padding "|2px 4px") (:cursor :pointer)
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn Enum $ -> Unit
+                      Fn AnyEnum $ -> Unit
                       -> Unit
-                    d! $ :: :states cursor $ not state
+                    d! $ app.schema/Op :states cursor $ not state
                   :inner-text "|()"
                 if state
                   div
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn Enum $ -> Unit
+                          Fn AnyEnum $ -> Unit
                           -> Unit
-                        d! $ :: :states cursor $ not state
+                        d! $ app.schema/Op :states cursor $ not state
                     <> |folded
                   list->
                     {} $ :style $ {}
@@ -217,7 +224,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (get states :cursor) ([])
-                  quote $ List Dynamic
+                  List Dynamic
                 state $ decode-map-as
                   .unwrap-or (get states :data) false
                   , 'Bool
@@ -227,18 +234,18 @@
                   :style $ {} (:padding "|2px 4px") (:cursor :pointer)
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn Enum $ -> Unit
+                      Fn AnyEnum $ -> Unit
                       -> Unit
-                    d! $ :: :states cursor $ not state
+                    d! $ app.schema/Op :states cursor $ not state
                   :inner-text |{}
                 if state
                   div
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn Enum $ -> Unit
+                          Fn AnyEnum $ -> Unit
                           -> Unit
-                        d! $ :: :states cursor $ not state
+                        d! $ app.schema/Op :states cursor $ not state
                     <> |folded
                   data-list->
                     {} $ :style $ {} (:display :grid) (:grid-template-columns "|1fr 100fr") (:grid-gap |0px)
@@ -251,7 +258,7 @@
                               [] k $ div
                                 {} $ :style $ {} (:padding "|2px 4px") (:white-space :nowrap)
                                 comp-data (data-states states k) k
-                              quote $ Tuple Dynamic respo.schema/Element
+                              Tuple Dynamic respo.schema/Element
                             let
                                 path $ str k |-value
                               assert-type
@@ -260,9 +267,9 @@
                                   or
                                     comp-data (>> states path) child
                                     <> $ str |Special: $ to-lispy-string child
-                                quote $ Tuple Dynamic respo.schema/Element
+                                Tuple Dynamic respo.schema/Element
                       assert-type ([])
-                        quote $ List $ Tuple Dynamic respo.schema/Element
+                        List $ Tuple Dynamic respo.schema/Element
                       fn (acc pair)
                         hint-fn $ Fn
                           List $ Tuple Dynamic respo.schema/Element
@@ -293,7 +300,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (get states :cursor) ([])
-                  quote $ List Dynamic
+                  List Dynamic
                 state $ decode-map-as
                   .unwrap-or (get states :data) false
                   , 'Bool
@@ -304,17 +311,17 @@
                   :inner-text |[]
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn Enum $ -> Unit
+                      Fn AnyEnum $ -> Unit
                       -> Unit
-                    d! $ :: :states cursor $ not state
+                    d! $ app.schema/Op :states cursor $ not state
                 if state
                   div
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn Enum $ -> Unit
+                          Fn AnyEnum $ -> Unit
                           -> Unit
-                        d! $ :: :states cursor $ not state
+                        d! $ app.schema/Op :states cursor $ not state
                     <> |folded
                   list->
                     {} $ :style $ {}
@@ -361,20 +368,23 @@
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *reel
-            -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
+            reel.typed/State :base schema/store :store schema/store :records ([]) :pointer (Option :none) :stopped? false :display? false :merged? false
           :examples $ []
-          :schema $ quote $ Ref (Map Tag Dynamic)
+          :schema $ quote $ Ref
+            reel.typed/State app.schema/Op $ Map Tag Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            reset! *reel $ reel-updater app.updater/update-wire-store @*reel op
+            match (reel.typed/decode-control op)
+              (:some control)
+                reset! *reel $ reel.typed/apply-control app.updater/updater @*reel control
+              (:none)
+                match (schema/decode-op op)
+                  (:some action)
+                    reset! *reel $ reel.typed/record-op app.updater/updater @*reel action (generate-id!) (js-ffi.shared/now-ms)
+                  (:none) &unit
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Enum (-> Unit)
-        'dispatch-wire! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dispatch-wire! (op)
-            if (enum? op) (dispatch! op) (raise |Expected-Enum-operation)
-          :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Unit)
+          :schema $ quote $ Fn AnyEnum (-> Unit) (:features :js-ffi)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
@@ -382,14 +392,13 @@
               (:some raw)
                 match (try-parse-cirru-edn raw)
                   (:ok parsed)
-                    dispatch! $ :: :hydrate-storage $ decode-map-as parsed
-                      quote $ Map Tag Dynamic
+                    dispatch! $ :: :hydrate-storage $ decode-map-as parsed (Map Tag Dynamic)
                   (:err message)
                     raise $ str "|Cannot restore edn-grid; existing archive is kept: " message
               (:none) &unit
             render-app!
             add-watch! *reel :changes $ fn (r p) (render-app!)
-            listen-devtools! |a dispatch-wire!
+            listen-devtools! |a dispatch!
             js-ffi.browser/add-event-listener! |beforeunload $ fn (_) (persist-storage!)
             println "|App started."
             , &unit
@@ -402,42 +411,73 @@
           :schema $ quote respo.dom/DomElement
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! ()
-            js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ decode-map-as
-              .unwrap $ get @*reel :store
-              quote $ Map Tag Dynamic
+            js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ :store @*reel
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (clear-cache!)
-            reset! *reel $ decode-map-as (refresh-reel @*reel schema/store app.updater/update-wire-store)
-              quote $ Map Tag Dynamic
+            reset! *reel $ reel.typed/refresh app.updater/updater @*reel schema/store
             println "|Code updated."
             , &unit
           :examples $ []
           :schema $ quote $ Fn (-> Unit)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            with-memo-frame $ fn () $ render! mount-target (comp-container @*reel) dispatch-wire!
+            render-with! mount-target
+              fn () $ comp-container @*reel
+              , dispatch!
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
-            respo.core :refer $ render! clear-cache!
+            respo.core :refer $ render-with! clear-cache!
             app.comp.container :refer $ comp-container
             app.schema :as schema
             reel.util :refer $ listen-devtools!
-            reel.core :refer $ reel-updater refresh-reel
-            reel.schema :as reel-schema
             app.config :refer $ dev?
-            respo.memo :refer $ with-memo-frame
     'app.schema $ %{} 'FileEntry
       :defs $ {}
+        'DispatchOp $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ def DispatchOp (:: :unhandled)
+          :examples $ []
+          :schema $ quote AnyEnum
+        'Op $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum Op
+            :states (List Dynamic) Dynamic
+            :content String
+            :data Dynamic
+            :error String
+            :page Tag
+            :hydrate-storage $ Map Tag Dynamic
+          :examples $ []
+          :schema $ quote EnumDef
         'config $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def config
             {} $ :storage |edn-grid
           :examples $ []
           :schema $ quote $ Map Tag String
+        'decode-op $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn decode-op (op)
+            match op
+              (:states cursor data)
+                Option :some $ Op :states
+                  decode-map-as cursor $ List Dynamic
+                  , data
+              (:content text)
+                Option :some $ Op :content $ decode-map-as text String
+              (:data data)
+                Option :some $ Op :data data
+              (:error message)
+                Option :some $ Op :error $ decode-map-as message String
+              (:page page)
+                Option :some $ Op :page $ decode-map-as page Tag
+              (:hydrate-storage data)
+                Option :some $ Op :hydrate-storage $ decode-map-as data (Map Tag Dynamic)
+              _ $ do (eprintln "|Unknown op:" op) (Option :none)
+          :examples $ []
+          :schema $ quote $ Fn AnyEnum
+            -> $ Option app.schema/Op
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
             {}
@@ -451,46 +491,27 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
     'app.updater $ %{} 'FileEntry
-      :defs $ {}
-        'update-wire-store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn update-wire-store (store op op-id op-time)
-            if (enum? op)
-              updater
-                decode-map-as store $ quote $ Map Tag Dynamic
-                , op (decode-map-as op-id 'String) (decode-map-as op-time 'Number)
-              raise |Expected-Enum-operation
-          :examples $ []
-          :schema $ quote $ Fn Dynamic Dynamic Dynamic Dynamic
-            -> $ Map Tag Dynamic
-        'updater $ %{} 'CodeEntry (:doc |)
+      :defs $ {} $ 'updater
+        %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
-                decode-map-as
-                  update-states store
-                    decode-map-as cursor $ quote $ List Dynamic
-                    , s
-                  quote $ Map Tag Dynamic
-              (:content t)
-                assoc store :content $ decode-map-as t 'String
+                decode-map-as (update-states store cursor s) (Map Tag Dynamic)
+              (:content t) (assoc store :content t)
               (:data d)
                 -> store (assoc :data d) (assoc :error nil) (assoc :page :grid)
-              (:error e)
-                assoc store :error $ decode-map-as e 'String
-              (:page p)
-                assoc store :page $ decode-map-as p 'Tag
-              (:hydrate-storage d)
-                decode-map-as d $ quote $ Map Tag Dynamic
-              _ $ do (eprintln "|Unknown op:" op) store
+              (:error e) (assoc store :error e)
+              (:page p) (assoc store :page p)
+              (:hydrate-storage d) d
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) Enum String Number
+          :schema $ quote $ Fn (Map Tag Dynamic) app.schema/Op String Number
             -> $ Map Tag Dynamic
           :tests $ []
             %{} 'TestEntry (:name |content-update)
               :code $ quote $ assert= |hello
                 decode-map-as
                   .unwrap $ get
-                    updater app.schema/store (:: :content |hello) |id 0
+                    updater app.schema/store (app.schema/Op :content |hello) |id 0
                     , :content
                   , 'String
               :tags $ #{} :unit
@@ -499,7 +520,7 @@
                 decode-map-as
                   .unwrap $ get
                     updater app.schema/store
-                      :: :data $ [] 1 2
+                      app.schema/Op :data $ [] 1 2
                       , |id 0
                     , :page
                   , 'Tag
@@ -508,7 +529,7 @@
               :code $ quote $ assert= |invalid
                 decode-map-as
                   .unwrap $ get
-                    updater app.schema/store (:: :error |invalid) |id 0
+                    updater app.schema/store (app.schema/Op :error |invalid) |id 0
                     , :error
                   , 'String
               :tags $ #{} :unit
@@ -516,7 +537,7 @@
               :code $ quote $ assert= :about
                 decode-map-as
                   .unwrap $ get
-                    updater app.schema/store (:: :page :about) |id 0
+                    updater app.schema/store (app.schema/Op :page :about) |id 0
                     , :page
                   , 'Tag
               :tags $ #{} :unit
@@ -525,7 +546,7 @@
                 decode-map-as
                   .unwrap $ get
                     updater app.schema/store
-                      :: :hydrate-storage $ assoc app.schema/store :content |saved
+                      app.schema/Op :hydrate-storage $ assoc app.schema/store :content |saved
                       , |id 0
                     , :content
                   , 'String
