@@ -16,6 +16,7 @@ import { new_reel } from '../js-out/reel.typed.mjs';
 
 const t = c.init_tags(['event', 'children', 'click', 'input', 'some', 'value', 'content', 'data', 'error', 'page', 'grid', 'states', 'cursor', 'root', 'a', 'node', 'store', 'base']);
 const map = c._$n__$M_;
+const noError = c._PCT__$o__$o_(c.Option, c.newTag('none'));
 const field = (v, k) => invoke_method('unwrap', c.get(v, k));
 const nth = (v, i) => invoke_method('unwrap', c.nth(v, i));
 const en = c._$n_enum_$o_nth;
@@ -41,7 +42,7 @@ function dispatch(fn, event = event__GT_edn(new Event('click'))) {
 }
 for (const [label, text] of [['Parse JSON', '{"a":[1,2]}'], ['Parse EDN', '{} (:a ([] 1 2))']]) {
   test(`${label} keeps parsed data and switches to grid page`, () => {
-    const op = dispatch(handler(comp_home(text, null), t.click, label));
+    const op = dispatch(handler(comp_home(text, noError), t.click, label));
     const next = updater(store, op, 'parse', 1);
     assert.equal(en(op, 0), t.data);
     assert.equal(field(next, t.page), t.grid);
@@ -51,7 +52,7 @@ for (const [label, text] of [['Parse JSON', '{"a":[1,2]}'], ['Parse EDN', '{} (:
 }
 test('invalid JSON dispatches an error without replacing previous data', () => {
   const initial = c.assoc(store, t.data, 'kept');
-  const op = dispatch(handler(comp_home('{broken', null), t.click, 'Parse JSON'));
+  const op = dispatch(handler(comp_home('{broken', noError), t.click, 'Parse JSON'));
   assert.equal(en(op, 0), t.error);
   const next = updater(initial, op, 'error', 1);
   assert.equal(field(next, t.data), 'kept');
@@ -60,7 +61,7 @@ test('invalid JSON dispatches an error without replacing previous data', () => {
 test('text input sends a single content Enum', () => {
   const native = new Event('input');
   Object.defineProperty(native, 'target', { value: { value: 'fixture' } });
-  const op = dispatch(handler(comp_home('', null), t.input), event__GT_edn(native));
+  const op = dispatch(handler(comp_home('', noError), t.input), event__GT_edn(native));
   assert.equal(field(updater(store, op, 'input', 1), t.content), 'fixture');
 });
 for (const [name, render, data] of [['list', comp_list, c._$L_(1, 2)], ['vector', comp_vector, c._$L_(1, 2)], ['map', comp_map, map(t.a, 1)]]) {
