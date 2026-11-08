@@ -6,7 +6,7 @@
     {} (:description |) (:init-fn 'app.main/main!) (:mode :js) (:reload-fn 'app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |respo-feather.calcit/ |js-ffi/
-      :type-slots $ {} $ :dispatch-op |app.schema/DispatchOp
+      :type-slots $ {} $ :dispatch-op 'app.schema/Op
   :files $ {}
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
@@ -33,8 +33,10 @@
                 content $ decode-map-as
                   .unwrap $ get store :content
                   , 'String
-                error $ .unwrap-or (get store :error) nil
-                data $ .unwrap-or (get store :data) nil
+                error $ .and-then (get store :error)
+                  fn (message)
+                    if (string? message) (Option :some message) (Option :none)
+                data $ get store :data
               div
                 {} $ :style $ .merge ui/global ui/fullscreen ui/row
                 comp-sidebar page
@@ -42,7 +44,9 @@
                   :home $ comp-home content error
                   :grid $ div
                     {} $ :style $ {} (:padding 4) (:overflow :auto)
-                    comp-edn-grid states data
+                    match data
+                      (:some value) (comp-edn-grid states value)
+                      (:none) (comp-edn-grid states nil)
                   :about $ comp-about
                   _ $ <> $ str "|unknown: " page
                 comp-typed-reel (>> states :reel) reel $ {}
@@ -59,7 +63,7 @@
                 :style $ .merge ui/textarea ui/flex $ {} (:width 640) (:resize :none) (:font-family ui/font-code) (:flex-shrink 0) (:line-height |1.4em)
                 :on-input $ fn (e d!)
                   hint-fn $ Fn respo.schema/RespoEvent
-                    Fn AnyEnum $ -> Unit
+                    Fn app.schema/Op $ -> Unit
                     -> Unit
                   d! $ app.schema/Op :content $ decode-map-as (:value e) 'String
               div
@@ -69,7 +73,7 @@
                     {} (:style ui/button)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn AnyEnum $ -> Unit
+                          Fn app.schema/Op $ -> Unit
                           -> Unit
                         match (try-parse-cirru-edn content)
                           (:ok data)
@@ -82,7 +86,7 @@
                     {} (:style ui/button)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn AnyEnum $ -> Unit
+                          Fn app.schema/Op $ -> Unit
                           -> Unit
                         match (try-parse-json content)
                           (:ok data)
@@ -90,11 +94,10 @@
                           (:err message)
                             d! $ app.schema/Op :error message
                     <> "|Parse JSON"
-                if (string? error)
-                  Option :some $ <> error $ {} (:color :red)
-                  Option :none
+                .map error $ fn (message)
+                  <> message $ {} $ :color :red
           :examples $ []
-          :schema $ quote $ Fn String Dynamic (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn String (Option String) (-> respo.schema/Component) (:features :js-ffi)
         'comp-sidebar $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-sidebar (page)
             div
@@ -113,7 +116,7 @@
                 :style $ if (= page current-page) (assoc style-entry :color :white) style-entry
                 :on-click $ fn (e d!)
                   hint-fn $ Fn respo.schema/RespoEvent
-                    Fn AnyEnum $ -> Unit
+                    Fn app.schema/Op $ -> Unit
                     -> Unit
                   d! $ app.schema/Op :page page
               comp-i icon-name 14 $ hsl 400 80 80
@@ -197,7 +200,7 @@
                   :style $ {} (:padding "|2px 4px") (:cursor :pointer)
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn AnyEnum $ -> Unit
+                      Fn app.schema/Op $ -> Unit
                       -> Unit
                     d! $ app.schema/Op :states cursor $ not state
                   :inner-text "|()"
@@ -206,7 +209,7 @@
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn AnyEnum $ -> Unit
+                          Fn app.schema/Op $ -> Unit
                           -> Unit
                         d! $ app.schema/Op :states cursor $ not state
                     <> |folded
@@ -234,7 +237,7 @@
                   :style $ {} (:padding "|2px 4px") (:cursor :pointer)
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn AnyEnum $ -> Unit
+                      Fn app.schema/Op $ -> Unit
                       -> Unit
                     d! $ app.schema/Op :states cursor $ not state
                   :inner-text |{}
@@ -243,7 +246,7 @@
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn AnyEnum $ -> Unit
+                          Fn app.schema/Op $ -> Unit
                           -> Unit
                         d! $ app.schema/Op :states cursor $ not state
                     <> |folded
@@ -311,7 +314,7 @@
                   :inner-text |[]
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn AnyEnum $ -> Unit
+                      Fn app.schema/Op $ -> Unit
                       -> Unit
                     d! $ app.schema/Op :states cursor $ not state
                 if state
@@ -319,7 +322,7 @@
                     {} (:style style-folded)
                       :on-click $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn AnyEnum $ -> Unit
+                          Fn app.schema/Op $ -> Unit
                           -> Unit
                         d! $ app.schema/Op :states cursor $ not state
                     <> |folded
@@ -378,13 +381,10 @@
               (:some control)
                 reset! *reel $ reel.typed/apply-control app.updater/updater @*reel control
               (:none)
-                match (schema/decode-op op)
-                  (:some action)
-                    reset! *reel $ reel.typed/record-op app.updater/updater @*reel action (generate-id!) (js-ffi.shared/now-ms)
-                  (:none) &unit
+                reset! *reel $ reel.typed/record-op app.updater/updater @*reel op (generate-id!) (js-ffi.shared/now-ms)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn AnyEnum (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn app.schema/Op (-> Unit) (:features :js-ffi)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
@@ -392,13 +392,13 @@
               (:some raw)
                 match (try-parse-cirru-edn raw)
                   (:ok parsed)
-                    dispatch! $ :: :hydrate-storage $ decode-map-as parsed (Map Tag Dynamic)
+                    dispatch! $ app.schema/Op :hydrate-storage $ decode-map-as parsed (Map Tag Dynamic)
                   (:err message)
                     raise $ str "|Cannot restore edn-grid; existing archive is kept: " message
               (:none) &unit
             render-app!
             add-watch! *reel :changes $ fn (r p) (render-app!)
-            listen-devtools! |a dispatch!
+            listen-devtools-toggle! |a $ fn () $ dispatch! (app.schema/Op :reel/toggle)
             js-ffi.browser/add-event-listener! |beforeunload $ fn (_) (persist-storage!)
             println "|App started."
             , &unit
@@ -434,22 +434,25 @@
             respo.core :refer $ render-with! clear-cache!
             app.comp.container :refer $ comp-container
             app.schema :as schema
-            reel.util :refer $ listen-devtools!
+            reel.util :refer $ listen-devtools-toggle!
             app.config :refer $ dev?
     'app.schema $ %{} 'FileEntry
       :defs $ {}
-        'DispatchOp $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def DispatchOp (:: :unhandled)
-          :examples $ []
-          :schema $ quote AnyEnum
         'Op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Op
-            :states (List Dynamic) Dynamic
+            :states (List Dynamic) Bool
             :content String
             :data Dynamic
             :error String
             :page Tag
             :hydrate-storage $ Map Tag Dynamic
+            :reel/toggle
+            :reel/recall Number
+            :reel/run
+            :reel/step
+            :reel/merge
+            :reel/reset
+            :reel/remove Number
           :examples $ []
           :schema $ quote EnumDef
         'config $ %{} 'CodeEntry (:doc |)
@@ -457,27 +460,6 @@
             {} $ :storage |edn-grid
           :examples $ []
           :schema $ quote $ Map Tag String
-        'decode-op $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn decode-op (op)
-            match op
-              (:states cursor data)
-                Option :some $ Op :states
-                  decode-map-as cursor $ List Dynamic
-                  , data
-              (:content text)
-                Option :some $ Op :content $ decode-map-as text String
-              (:data data)
-                Option :some $ Op :data data
-              (:error message)
-                Option :some $ Op :error $ decode-map-as message String
-              (:page page)
-                Option :some $ Op :page $ decode-map-as page Tag
-              (:hydrate-storage data)
-                Option :some $ Op :hydrate-storage $ decode-map-as data (Map Tag Dynamic)
-              _ $ do (eprintln "|Unknown op:" op) (Option :none)
-          :examples $ []
-          :schema $ quote $ Fn AnyEnum
-            -> $ Option app.schema/Op
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
             {}
@@ -503,6 +485,7 @@
               (:error e) (assoc store :error e)
               (:page p) (assoc store :page p)
               (:hydrate-storage d) d
+              _ store
           :examples $ []
           :schema $ quote $ Fn (Map Tag Dynamic) app.schema/Op String Number
             -> $ Map Tag Dynamic
