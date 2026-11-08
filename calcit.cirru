@@ -104,16 +104,19 @@
               {} $ :style $ {}
                 :background-color $ hsl 0 30 40
                 :color :white
-              render-icon :home :home page
-              render-icon :grid :grid page
-              render-icon :about :info page
+              render-icon (app.schema/Page :home) :home page
+              render-icon (app.schema/Page :grid) :grid page
+              render-icon (app.schema/Page :about) :info page
           :examples $ []
           :schema $ quote $ Fn Tag (-> respo.schema/Component) (:features :js-ffi)
         'render-icon $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-icon (page icon-name current-page)
             div
               {}
-                :style $ if (= page current-page) (assoc style-entry :color :white) style-entry
+                :style $ if
+                  = (app.schema/page-tag page) current-page
+                  assoc style-entry :color :white
+                  , style-entry
                 :on-click $ fn (e d!)
                   hint-fn $ Fn respo.schema/RespoEvent
                     Fn app.schema/Op $ -> Unit
@@ -121,13 +124,13 @@
                   d! $ app.schema/Op :page page
               comp-i icon-name 14 $ hsl 400 80 80
           :examples $ []
-          :schema $ quote $ Fn Tag Tag Tag (-> respo.schema/Element) (:features :js-ffi)
+          :schema $ quote $ Fn app.schema/Page Tag Tag (-> respo.schema/Element) (:features :js-ffi)
         'style-entry $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-entry
             .merge ui/center $ {} (:font-size 32) (:height 48) (:width 40) (:cursor :pointer)
               :color $ hsl 0 0 70
           :examples $ []
-          :schema $ quote $ Map Tag Dynamic
+          :schema $ quote $ Map Tag respo-ui.schema/StyleValue
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
@@ -213,12 +216,12 @@
                           -> Unit
                         d! $ app.schema/Op :states cursor $ not state
                     <> |folded
-                  list->
+                  respo.core/keyed->
                     {} $ :style $ {}
                       :border-left $ str "|1px solid " $ hsl 40 170 90
                       :padding "|2px 4px"
-                    -> data $ map-indexed $ fn (idx child)
-                      [] idx $ div ({})
+                    map-indexed data $ fn (idx child)
+                      respo.core/keyed-element idx $ div ({})
                         comp-data (>> states idx) child
           :examples $ []
           :schema $ quote $ Fn (Map Dynamic Dynamic) (List Dynamic) (-> respo.schema/Component) (:features :js-ffi)
@@ -288,13 +291,13 @@
               div $ {}
                 :style $ {} $ :padding "|2px 4px"
                 :inner-text |#{}
-              list->
+              respo.core/keyed->
                 {} $ :style $ {}
                   :border-left $ str "|1px solid " $ hsl 0 170 90
                   :padding "|2px 4px"
-                -> data (.to-list)
-                  map-indexed $ fn (idx child)
-                    [] idx $ div ({})
+                map-indexed (.to-list data)
+                  fn (idx child)
+                    respo.core/keyed-element idx $ div ({})
                       comp-data (>> states idx) child
           :examples $ []
           :schema $ quote $ Fn (Map Dynamic Dynamic) (Set Dynamic) (-> respo.schema/Component) (:features :js-ffi)
@@ -326,12 +329,12 @@
                           -> Unit
                         d! $ app.schema/Op :states cursor $ not state
                     <> |folded
-                  list->
+                  respo.core/keyed->
                     {} $ :style $ {}
                       :border-left $ str "|1px solid " $ hsl 0 60 90
                       :padding "|2px 4px"
-                    -> data $ map-indexed $ fn (idx child)
-                      [] idx $ comp-data (>> states idx) child
+                    map-indexed data $ fn (idx child)
+                      respo.core/keyed-component idx $ comp-data (>> states idx) child
           :examples $ []
           :schema $ quote $ Fn (Map Dynamic Dynamic) (List Dynamic) (-> respo.schema/Component) (:features :js-ffi)
         'style-folded $ %{} 'CodeEntry (:doc |)
@@ -346,7 +349,7 @@
               :border-radius |2px
               :cursor :pointer
           :examples $ []
-          :schema $ quote $ Map Tag Dynamic
+          :schema $ quote $ Map Tag respo.schema/CssValue
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.edn-grid
           :require
@@ -444,7 +447,7 @@
             :content String
             :data Dynamic
             :error String
-            :page Tag
+            :page app.schema/Page
             :hydrate-storage $ Map Tag Dynamic
             :reel/toggle
             :reel/recall Number
@@ -455,11 +458,23 @@
             :reel/remove Number
           :examples $ []
           :schema $ quote EnumDef
+        'Page $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum Page (:home) (:grid) (:about)
+          :examples $ []
+          :schema $ quote EnumDef
         'config $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def config
             {} $ :storage |edn-grid
           :examples $ []
           :schema $ quote $ Map Tag String
+        'page-tag $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn page-tag (page)
+            match page
+              (:home) :home
+              (:grid) :grid
+              (:about) :about
+          :examples $ []
+          :schema $ quote $ Fn app.schema/Page (-> Tag)
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
             {}
@@ -483,7 +498,8 @@
               (:data d)
                 -> store (assoc :data d) (assoc :error nil) (assoc :page :grid)
               (:error e) (assoc store :error e)
-              (:page p) (assoc store :page p)
+              (:page p)
+                assoc store :page $ app.schema/page-tag p
               (:hydrate-storage d) d
               _ store
           :examples $ []
@@ -520,7 +536,9 @@
               :code $ quote $ assert= :about
                 decode-map-as
                   .unwrap $ get
-                    updater app.schema/store (app.schema/Op :page :about) |id 0
+                    updater app.schema/store
+                      app.schema/Op :page $ app.schema/Page :about
+                      , |id 0
                     , :page
                   , 'Tag
               :tags $ #{} :unit
