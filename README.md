@@ -8,9 +8,9 @@ Demo http://repo.memkits.org/edn-grid/
 
 ### 使用者影响
 
-升级到正式 Calcit 和 `@calcit/procs` **0.37.0** 后，请重新安装依赖、编译并刷新。JSON/EDN 解析、错误提示、折叠与展开和 `edn-grid` Map 存档沿用原有行为。恢复存档后才注册离页保存。
+升级到正式 Calcit 和 `@calcit/procs` **0.38.0** 后，请重新安装依赖、编译并刷新。JSON/EDN 解析、错误提示、折叠与展开和 `edn-grid` Map 存档沿用原有行为。恢复存档后才注册离页保存。
 
-`Scalar` union 描述 String、Number、Tag、Symbol 和 Bool 的显示，任意 EDN 和异构状态路径继续适用。Map 的 Bool/List 键由 Respo 的 `data-states` / `data-list->` 处理，原值分支的字符串路径规则保持。界面与 Reel 使用具名 `Op`，折叠状态明确为 Bool，独立 Reel 控制沿用原处理方式。
+`Scalar` union 描述 String、Number、Tag、Symbol 和 Bool 的显示，任意 EDN 和异构状态路径继续适用。Map 的 Bool/List 键由 Respo 的 `data-states` / `data-list->` 处理，按索引渲染的集合使用 `ChildPair`。导航操作使用具名 `Page`，存档仍保存原 Tag。折叠状态为 Bool，折叠样式使用 Respo CSS 值 union。
 
 依赖使用正式 Reel **0.10.0**、Respo **0.19.5**、UI **0.15.2**、Feather **0.6.3**、JS-FFI **0.2.13**，传递 Router **0.12.2**。
 
