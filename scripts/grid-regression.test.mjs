@@ -91,7 +91,7 @@ test('nested collections and scalar values render without runtime Option errors'
 test('mixed numeric, string and Tag state branches survive full grid rendering', () => {
   const states = map(0, map(t.data, true), 'value-branch', map(t.data, false), t.root, map(t.data, false));
   const next = c.assoc(c.assoc(c.assoc(store, t.states, states), t.data, map(t.a, c._$L_('mixed-state'))), t.page, t.grid);
-  const html = make_string(comp_container(new_reel(next)));
+  const html = make_string(comp_container(new_reel(next), () => {}));
   assert.ok(html.includes('mixed-state'));
   assert.equal(field(field(states, 0), t.data), true);
   assert.equal(field(field(states, 'value-branch'), t.data), false);
