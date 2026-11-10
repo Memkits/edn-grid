@@ -21,7 +21,7 @@
           :examples $ []
           :schema $ quote $ Fn (-> respo.schema/Component) (:features :js-ffi)
         'comp-container $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defcomp comp-container (reel)
+          :code $ quote $ defcomp comp-container (reel on-control!)
             let
                 store $ :store reel
                 states $ decode-map-as
@@ -49,10 +49,11 @@
                       (:none) (comp-edn-grid states nil)
                   :about $ comp-about
                   _ $ <> $ str "|unknown: " page
-                comp-typed-reel (>> states :reel) reel $ {}
+                comp-typed-reel (>> states :reel) reel ({}) on-control!
           :examples $ []
           :schema $ quote $ Fn
             reel.typed/State app.schema/Op $ Map Tag Dynamic
+            Fn reel.typed/Control $ -> Unit
             -> respo.schema/Component
             :features :js-ffi
         'comp-home $ %{} 'CodeEntry (:doc |)
@@ -380,14 +381,13 @@
             reel.typed/State app.schema/Op $ Map Tag Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            match (reel.typed/decode-control op)
-              (:some control)
-                reset! *reel $ reel.typed/apply-control app.updater/updater @*reel control
-              (:none)
-                reset! *reel $ reel.typed/record-op app.updater/updater @*reel op (generate-id!) (js-ffi.shared/now-ms)
+            reset! *reel $ match op
+              (reel.typed/Control control) (reel.typed/apply-control app.updater/updater @*reel control)
+              (app.schema/Op action)
+                reel.typed/record-op app.updater/updater @*reel action (generate-id!) (js-ffi.shared/now-ms)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn app.schema/Op (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn app.schema/ResolvedOp (-> Unit) (:features :js-ffi)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
@@ -401,7 +401,7 @@
               (:none) &unit
             render-app!
             add-watch! *reel :changes $ fn (r p) (render-app!)
-            listen-devtools-toggle! |a $ fn () $ dispatch! (app.schema/Op :reel/toggle)
+            listen-devtools-toggle! |a $ fn () $ on-control! (reel.typed/Control :toggle)
             js-ffi.browser/add-event-listener! |beforeunload $ fn (_) (persist-storage!)
             println "|App started."
             , &unit
@@ -412,6 +412,10 @@
             .unwrap $ respo.ffi.browser/query-selector |.app
           :examples $ []
           :schema $ quote respo.dom/DomElement
+        'on-control! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn on-control! (control) (dispatch! control)
+          :examples $ []
+          :schema $ quote $ Fn reel.typed/Control (-> Unit)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! ()
             js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ :store @*reel
@@ -427,8 +431,10 @@
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render-with! mount-target
-              fn () $ comp-container @*reel
-              , dispatch!
+              fn () $ comp-container @*reel on-control!
+              fn (op)
+                hint-fn $ Fn app.schema/Op $ -> Unit
+                dispatch! op
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
@@ -449,19 +455,16 @@
             :error String
             :page app.schema/Page
             :hydrate-storage $ Map Tag Dynamic
-            :reel/toggle
-            :reel/recall Number
-            :reel/run
-            :reel/step
-            :reel/merge
-            :reel/reset
-            :reel/remove Number
           :examples $ []
           :schema $ quote EnumDef
         'Page $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Page (:home) (:grid) (:about)
           :examples $ []
           :schema $ quote EnumDef
+        'ResolvedOp $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion ResolvedOp app.schema/Op reel.typed/Control
+          :examples $ []
+          :schema $ quote UnionDef
         'config $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def config
             {} $ :storage |edn-grid
