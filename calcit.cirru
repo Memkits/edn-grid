@@ -35,7 +35,7 @@
                   , 'String
                 error $ .and-then (get store :error)
                   fn (message)
-                    if (string? message) (Option :some message) (Option :none)
+                    if (string? message) (Some message) None
                 data $ get store :data
               div
                 {} $ :style $ .merge ui/global ui/fullscreen ui/row
@@ -157,7 +157,7 @@
               (list? data) (comp-list states data)
               (nil? data)
                 <> |nil $ {} (:color :red) (:margin "|0 8px")
-              (or (string? data) (number? data) (tag? data) (symbol? data) (or (= true data) (= false data)))
+              (or (string? data) (number? data) (tag? data) (symbol? data) (bool? data))
                 match (decode-map-as data app.comp.edn-grid/Scalar)
                   (String data)
                     <> (to-lispy-string data)
@@ -181,14 +181,14 @@
               true $ <> (to-lispy-string data)
                 {} $ :color :red
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) Dynamic (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
         'comp-edn-grid $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-edn-grid (states data)
             div
               {} $ :style $ {} (:line-height |18px) (:font-family ui/font-code) (:font-size 12)
               comp-data (>> states :root) data
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) Dynamic (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
         'comp-list $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-list (states data)
             let
@@ -225,7 +225,7 @@
                       respo.core/keyed-element idx $ div ({})
                         comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Dynamic) (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
         'comp-map $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-map (states data)
             let
@@ -284,7 +284,7 @@
                           -> $ List $ Tuple Dynamic respo.schema/Element
                         .concat acc pair
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map K V) (-> respo.schema/Component) (:generics K V) (:features :js-ffi)
         'comp-set $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-set (states data)
             div
@@ -301,7 +301,7 @@
                     respo.core/keyed-element idx $ div ({})
                       comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Set Dynamic) (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Set Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
         'comp-vector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-vector (states data)
             let
@@ -337,7 +337,7 @@
                     map-indexed data $ fn (idx child)
                       respo.core/keyed-component idx $ comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Dynamic) (-> respo.schema/Component) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
         'style-folded $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-folded
             {}
@@ -375,10 +375,10 @@
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *reel
-            reel.typed/State :base schema/store :store schema/store :records ([]) :pointer (Option :none) :stopped? false :display? false :merged? false
+            reel.typed/State :base schema/store :store schema/store :records ([]) :pointer None :stopped? false :display? false :merged? false
           :examples $ []
           :schema $ quote $ Ref
-            reel.typed/State app.schema/Op $ Map Tag Dynamic
+            reel.typed/State schema/Op $ Map Tag Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
             reset! *reel $ match op
@@ -387,7 +387,7 @@
                 reel.typed/record-op app.updater/updater @*reel action (generate-id!) (js-ffi.shared/now-ms)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn app.schema/ResolvedOp (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn schema/ResolvedOp (-> Unit) (:features :js-ffi)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
@@ -477,7 +477,7 @@
               (:grid) :grid
               (:about) :about
           :examples $ []
-          :schema $ quote $ Fn app.schema/Page (-> Tag)
+          :schema $ quote $ Fn Page (-> Tag)
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
             {}
