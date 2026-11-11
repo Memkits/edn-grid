@@ -52,9 +52,10 @@
                 comp-typed-reel (>> states :reel) reel ({}) on-control!
           :examples $ []
           :schema $ quote $ Fn
-            reel.typed/State app.schema/Op $ Map Tag Dynamic
+            reel.typed/State app.schema/Op $ Map Tag V
             Fn reel.typed/Control $ -> Unit
             -> respo.schema/Component
+            :generics V
             :features :js-ffi
         'comp-home $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-home (content error)
@@ -181,14 +182,14 @@
               true $ <> (to-lispy-string data)
                 {} $ :color :red
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
         'comp-edn-grid $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-edn-grid (states data)
             div
               {} $ :style $ {} (:line-height |18px) (:font-family ui/font-code) (:font-size 12)
               comp-data (>> states :root) data
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
         'comp-list $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-list (states data)
             let
@@ -225,7 +226,7 @@
                       respo.core/keyed-element idx $ div ({})
                         comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
         'comp-map $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-map (states data)
             let
@@ -284,7 +285,7 @@
                           -> $ List $ Tuple Dynamic respo.schema/Element
                         .concat acc pair
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map K V) (-> respo.schema/Component) (:generics K V) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (Map K V) (-> respo.schema/Component) (:generics K V) (:features :js-ffi)
         'comp-set $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-set (states data)
             div
@@ -301,7 +302,7 @@
                     respo.core/keyed-element idx $ div ({})
                       comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Set Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (Set Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
         'comp-vector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-vector (states data)
             let
@@ -337,7 +338,7 @@
                     map-indexed data $ fn (idx child)
                       respo.core/keyed-component idx $ comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
         'style-folded $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-folded
             {}
