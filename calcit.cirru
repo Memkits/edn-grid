@@ -194,10 +194,10 @@
           :code $ quote $ defcomp comp-list (states data)
             let
                 cursor $ decode-map-as
-                  .unwrap-or (get states :cursor) ([])
+                  .unwrap-or (&map:get states :cursor) ([])
                   List Dynamic
                 state $ decode-map-as
-                  .unwrap-or (get states :data) false
+                  .unwrap-or (&map:get states :data) false
                   , 'Bool
               div
                 {} $ :style ui/row
@@ -231,10 +231,10 @@
           :code $ quote $ defcomp comp-map (states data)
             let
                 cursor $ decode-map-as
-                  .unwrap-or (get states :cursor) ([])
+                  .unwrap-or (&map:get states :cursor) ([])
                   List Dynamic
                 state $ decode-map-as
-                  .unwrap-or (get states :data) false
+                  .unwrap-or (&map:get states :data) false
                   , 'Bool
               div
                 {} $ :style ui/row
@@ -307,10 +307,10 @@
           :code $ quote $ defcomp comp-vector (states data)
             let
                 cursor $ decode-map-as
-                  .unwrap-or (get states :cursor) ([])
+                  .unwrap-or (&map:get states :cursor) ([])
                   List Dynamic
                 state $ decode-map-as
-                  .unwrap-or (get states :data) false
+                  .unwrap-or (&map:get states :data) false
                   , 'Bool
               div
                 {} $ :style ui/row
@@ -434,7 +434,7 @@
             render-with! mount-target
               fn () $ comp-container @*reel on-control!
               fn (op)
-                hint-fn $ Fn app.schema/Op $ -> Unit
+                hint-fn $ Fn schema/Op $ -> Unit
                 dispatch! op
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
