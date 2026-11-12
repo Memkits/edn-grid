@@ -16,6 +16,7 @@ import { new_reel } from '../js-out/reel.typed.mjs';
 
 const t = c.init_tags(['event', 'children', 'click', 'input', 'some', 'value', 'content', 'data', 'error', 'page', 'grid', 'states', 'cursor', 'root', 'a', 'node', 'store', 'base']);
 const map = c._$n__$M_;
+const some = (value) => c._PCT__$o__$o_(c.Option, t.some, value);
 const noError = c._PCT__$o__$o_(c.Option, c.newTag('none'));
 const field = (v, k) => invoke_method('unwrap', c.get(v, k));
 const nth = (v, i) => invoke_method('unwrap', c.nth(v, i));
@@ -46,17 +47,17 @@ for (const [label, text] of [['Parse JSON', '{"a":[1,2]}'], ['Parse EDN', '{} (:
     const next = updater(store, op, 'parse', 1);
     assert.equal(en(op, 0), t.data);
     assert.equal(field(next, t.page), t.grid);
-    assert.equal(field(next, t.error), null);
-    assert.deepEqual(c.to_js_data(field(next, t.data)), { a: [1, 2] });
+    assert.ok(c._$e_(field(next, t.error), noError));
+    assert.deepEqual(c.to_js_data(invoke_method('unwrap', field(next, t.data))), { a: [1, 2] });
   });
 }
 test('invalid JSON dispatches an error without replacing previous data', () => {
-  const initial = c.assoc(store, t.data, 'kept');
+  const initial = c.assoc(store, t.data, some('kept'));
   const op = dispatch(handler(comp_home('{broken', noError), t.click, 'Parse JSON'));
   assert.equal(en(op, 0), t.error);
   const next = updater(initial, op, 'error', 1);
-  assert.equal(field(next, t.data), 'kept');
-  assert.ok(field(next, t.error).length > 0);
+  assert.equal(invoke_method('unwrap', field(next, t.data)), 'kept');
+  assert.ok(invoke_method('unwrap', field(next, t.error)).length > 0);
 });
 test('text input sends a single content Enum', () => {
   const native = new Event('input');
@@ -90,7 +91,7 @@ test('nested collections and scalar values render without runtime Option errors'
 });
 test('mixed numeric, string and Tag state branches survive full grid rendering', () => {
   const states = map(0, map(t.data, true), 'value-branch', map(t.data, false), t.root, map(t.data, false));
-  const next = c.assoc(c.assoc(c.assoc(store, t.states, states), t.data, map(t.a, c._$L_('mixed-state'))), t.page, t.grid);
+  const next = c.assoc(c.assoc(c.assoc(store, t.states, states), t.data, some(map(t.a, c._$L_('mixed-state')))), t.page, t.grid);
   const html = make_string(comp_container(new_reel(next), () => {}));
   assert.ok(html.includes('mixed-state'));
   assert.equal(field(field(states, 0), t.data), true);
