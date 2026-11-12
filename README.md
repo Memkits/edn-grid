@@ -8,7 +8,7 @@ Demo http://repo.memkits.org/edn-grid/
 
 ### 使用者影响
 
-升级到正式 Calcit 和 `@calcit/procs` **0.41.1** 后，请重新安装依赖、编译并刷新。JSON/EDN 解析、错误提示、折叠与展开和 `edn-grid` Map 存档沿用原有行为。恢复存档后才注册离页保存。
+升级到正式 Calcit 和 `@calcit/procs` **0.42.1** 后，请重新安装依赖、编译并刷新。JSON/EDN 解析、错误提示、折叠与展开和 `edn-grid` Map 存档沿用原有行为。恢复存档后才注册离页保存。
 
 `Scalar` union 描述 String、Number、Tag、Symbol 和 Bool 的显示，任意 EDN 和异构状态路径继续适用。Map 的 Bool/List 键由 Respo 的 `data-states` / `data-list->` 处理，按索引渲染的集合使用 `ChildPair`。导航操作使用具名 `Page`，存档仍保存原 Tag。折叠状态为 Bool，折叠样式使用 Respo CSS 值 union。
 

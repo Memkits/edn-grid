@@ -24,19 +24,11 @@
           :code $ quote $ defcomp comp-container (reel on-control!)
             let
                 store $ :store reel
-                states $ decode-map-as
-                  .unwrap $ get store :states
-                  Map Dynamic Dynamic
-                page $ decode-map-as
-                  .unwrap $ get store :page
-                  , 'Tag
-                content $ decode-map-as
-                  .unwrap $ get store :content
-                  , 'String
-                error $ .and-then (get store :error)
-                  fn (message)
-                    if (string? message) (Some message) None
-                data $ get store :data
+                states store.:states
+                page store.:page
+                content store.:content
+                error store.:error
+                data store.:data
               div
                 {} $ :style $ .merge ui/global ui/fullscreen ui/row
                 comp-sidebar page
@@ -51,11 +43,9 @@
                   _ $ <> $ str "|unknown: " page
                 comp-typed-reel (>> states :reel) reel ({}) on-control!
           :examples $ []
-          :schema $ quote $ Fn
-            reel.typed/State app.schema/Op $ Map Tag V
+          :schema $ quote $ Fn (reel.typed/State app.schema/Op app.schema/Store)
             Fn reel.typed/Control $ -> Unit
             -> respo.schema/Component
-            :generics V
             :features :js-ffi
         'comp-home $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-home (content error)
@@ -378,8 +368,7 @@
           :code $ quote $ defref *reel
             reel.typed/State :base schema/store :store schema/store :records ([]) :pointer None :stopped? false :display? false :merged? false
           :examples $ []
-          :schema $ quote $ Ref
-            reel.typed/State schema/Op $ Map Tag Dynamic
+          :schema $ quote $ Ref (reel.typed/State schema/Op schema/Store)
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
             reset! *reel $ match op
@@ -388,7 +377,7 @@
                 reel.typed/record-op app.updater/updater @*reel action (generate-id!) (js-ffi.shared/now-ms)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/ResolvedOp (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn schema/ResolvedOp (-> Unit) (:features :js-ffi :state)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if dev? $ load-console-formatter!
@@ -396,7 +385,7 @@
               (:some raw)
                 match (try-parse-cirru-edn raw)
                   (:ok parsed)
-                    dispatch! $ app.schema/Op :hydrate-storage $ decode-map-as parsed (Map Tag Dynamic)
+                    dispatch! $ app.schema/Op :hydrate-storage $ schema/decode-store parsed
                   (:err message)
                     raise $ str "|Cannot restore edn-grid; existing archive is kept: " message
               (:none) &unit
@@ -407,7 +396,7 @@
             println "|App started."
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def mount-target
             .unwrap $ respo.ffi.browser/query-selector |.app
@@ -416,19 +405,19 @@
         'on-control! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-control! (control) (dispatch! control)
           :examples $ []
-          :schema $ quote $ Fn reel.typed/Control (-> Unit)
+          :schema $ quote $ Fn reel.typed/Control (-> Unit) (:features :state)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! ()
-            js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ :store @*reel
+            js-ffi.browser/storage-set! |edn-grid $ format-cirru-edn $ schema/encode-store (:store @*reel)
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (clear-cache!)
             reset! *reel $ reel.typed/refresh app.updater/updater @*reel schema/store
             println "|Code updated."
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render-with! mount-target
@@ -437,7 +426,7 @@
                 hint-fn $ Fn schema/Op $ -> Unit
                 dispatch! op
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
@@ -455,7 +444,7 @@
             :data Dynamic
             :error String
             :page app.schema/Page
-            :hydrate-storage $ Map Tag Dynamic
+            :hydrate-storage app.schema/Store
           :examples $ []
           :schema $ quote EnumDef
         'Page $ %{} 'CodeEntry (:doc |)
@@ -466,11 +455,53 @@
           :code $ quote $ defunion ResolvedOp app.schema/Op reel.typed/Control
           :examples $ []
           :schema $ quote UnionDef
+        'Store $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct Store
+            :states $ Map Dynamic Dynamic
+            :content String
+            :data $ Option Dynamic
+            :error $ Option String
+            :page Tag
+          :examples $ []
+          :schema $ quote StructDef
         'config $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def config
             {} $ :storage |edn-grid
           :examples $ []
           :schema $ quote $ Map Tag String
+        'decode-store $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn decode-store (raw)
+            let
+                archive $ decode-map-as raw $ Map Tag Dynamic
+                states $ decode-map-as
+                  .unwrap $ &map:get archive :states
+                  Map Dynamic Dynamic
+                content $ decode-map-as
+                  .unwrap $ &map:get archive :content
+                  , 'String
+                data $ &map:get archive :data
+                error $ .and-then (&map:get archive :error)
+                  fn (message)
+                    if (string? message) (Some message) None
+                page $ decode-map-as
+                  .unwrap $ &map:get archive :page
+                  , 'Tag
+              Store :states states :content content :data data :error error :page page
+          :examples $ []
+          :schema $ quote $ Fn Input (-> Store) (:generics Input)
+        'encode-store $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn encode-store (store)
+            let
+                archive $ {} (:states store.:states) (:content store.:content) (:data nil) (:error nil) (:page store.:page)
+                with-data $ match store.:data
+                  (:some value) (assoc archive :data value)
+                  (:none) archive
+              match store.:error
+                (:some message) (assoc with-data :error message)
+                (:none) with-data
+          :examples $ []
+          :schema $ quote $ Fn Store
+            -> $ Map Tag Dynamic
         'page-tag $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn page-tag (page)
             match page
@@ -481,14 +512,9 @@
           :schema $ quote $ Fn Page (-> Tag)
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
-            {}
-              :states $ {}
-              :content |
-              :data nil
-              :error nil
-              :page :home
+            Store :states ({}) :content | :data None :error None :page :home
           :examples $ []
-          :schema $ quote $ Map Tag Dynamic
+          :schema $ quote Store
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
     'app.updater $ %{} 'FileEntry
@@ -497,65 +523,62 @@
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
-                decode-map-as (update-states store cursor s) (Map Tag Dynamic)
+                assoc store :states $ decode-map-as (respo.cursor/update-state-tree store.:states cursor s) (Map Dynamic Dynamic)
               (:content t) (assoc store :content t)
               (:data d)
-                -> store (assoc :data d) (assoc :error nil) (assoc :page :grid)
-              (:error e) (assoc store :error e)
+                -> store
+                  assoc :data $ Some d
+                  assoc :error None
+                  assoc :page :grid
+              (:error e)
+                assoc store :error $ Some e
               (:page p)
                 assoc store :page $ app.schema/page-tag p
               (:hydrate-storage d) d
               _ store
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) app.schema/Op String Number
-            -> $ Map Tag Dynamic
+          :schema $ quote $ Fn app.schema/Store app.schema/Op String Number (-> app.schema/Store)
           :tests $ []
             %{} 'TestEntry (:name |content-update)
               :code $ quote $ assert= |hello
-                decode-map-as
-                  .unwrap $ get
-                    updater app.schema/store (app.schema/Op :content |hello) |id 0
-                    , :content
-                  , 'String
+                :content $ updater app.schema/store (app.schema/Op :content |hello) |id 0
               :tags $ #{} :unit
             %{} 'TestEntry (:name |data-navigation)
               :code $ quote $ assert= :grid
-                decode-map-as
-                  .unwrap $ get
-                    updater app.schema/store
-                      app.schema/Op :data $ [] 1 2
-                      , |id 0
-                    , :page
-                  , 'Tag
+                :page $ updater app.schema/store
+                  app.schema/Op :data $ [] 1 2
+                  , |id 0
               :tags $ #{} :unit
             %{} 'TestEntry (:name |error-update)
-              :code $ quote $ assert= |invalid
-                decode-map-as
-                  .unwrap $ get
-                    updater app.schema/store (app.schema/Op :error |invalid) |id 0
-                    , :error
-                  , 'String
+              :code $ quote $ assert= (Some |invalid)
+                :error $ updater app.schema/store (app.schema/Op :error |invalid) |id 0
               :tags $ #{} :unit
             %{} 'TestEntry (:name |page-navigation)
               :code $ quote $ assert= :about
-                decode-map-as
-                  .unwrap $ get
-                    updater app.schema/store
-                      app.schema/Op :page $ app.schema/Page :about
-                      , |id 0
-                    , :page
-                  , 'Tag
+                :page $ updater app.schema/store
+                  app.schema/Op :page $ app.schema/Page :about
+                  , |id 0
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |fold-state-roundtrip)
+              :code $ quote $ let
+                  cursor $ [] :root false
+                  folded $ updater app.schema/store (app.schema/Op :states cursor true) |fold 0
+                  restored $ app.schema/decode-store $ app.schema/encode-store folded
+                assert= (Some true)
+                  respo.cursor/get-state-at restored.:states $ [] :root false :data
               :tags $ #{} :unit
             %{} 'TestEntry (:name |storage-hydration)
-              :code $ quote $ assert= |saved
-                decode-map-as
-                  .unwrap $ get
-                    updater app.schema/store
-                      app.schema/Op :hydrate-storage $ assoc app.schema/store :content |saved
-                      , |id 0
-                    , :content
-                  , 'String
+              :code $ quote $ let
+                  saved $ {}
+                    :states $ {}
+                    :content |saved
+                    :data $ [] 1 2
+                    :error nil
+                    :page :grid
+                  restored $ updater app.schema/store
+                    app.schema/Op :hydrate-storage $ app.schema/decode-store saved
+                    , |id 0
+                assert= saved $ app.schema/encode-store restored
               :tags $ #{} :unit
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
-          :require $ respo.cursor :refer $ update-states
