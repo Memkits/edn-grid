@@ -457,7 +457,7 @@
           :schema $ quote UnionDef
         'Store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct Store
-            :states $ Map Dynamic Dynamic
+            :states $ Map respo.schema/CoordKey Dynamic
             :content String
             :data $ Option Dynamic
             :error $ Option String
@@ -475,7 +475,7 @@
                 archive $ decode-map-as raw $ Map Tag Dynamic
                 states $ decode-map-as
                   .unwrap $ &map:get archive :states
-                  Map Dynamic Dynamic
+                  Map respo.schema/CoordKey Dynamic
                 content $ decode-map-as
                   .unwrap $ &map:get archive :content
                   , 'String
@@ -523,7 +523,7 @@
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
-                assoc store :states $ decode-map-as (respo.cursor/update-state-tree store.:states cursor s) (Map Dynamic Dynamic)
+                assoc store :states $ decode-map-as (respo.cursor/update-state-tree store.:states cursor s) (Map respo.schema/CoordKey Dynamic)
               (:content t) (assoc store :content t)
               (:data d)
                 -> store
