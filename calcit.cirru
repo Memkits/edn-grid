@@ -185,7 +185,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (&map:get states :cursor) ([])
-                  List Dynamic
+                  List app.schema/GridKey
                 state $ decode-map-as
                   .unwrap-or (&map:get states :data) false
                   , 'Bool
@@ -222,7 +222,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (&map:get states :cursor) ([])
-                  List Dynamic
+                  List app.schema/GridKey
                 state $ decode-map-as
                   .unwrap-or (&map:get states :data) false
                   , 'Bool
@@ -298,7 +298,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap-or (&map:get states :cursor) ([])
-                  List Dynamic
+                  List app.schema/GridKey
                 state $ decode-map-as
                   .unwrap-or (&map:get states :data) false
                   , 'Bool
@@ -437,9 +437,13 @@
             app.config :refer $ dev?
     'app.schema $ %{} 'FileEntry
       :defs $ {}
+        'GridKey $ %{} 'CodeEntry
+          :doc "|One EDN Grid state path segment: Tag, String, Number, or Bool, matching the keys produced by the grid's fold/edit callbacks."
+          :code $ quote $ defunion GridKey Tag String Number Bool
+          :examples $ []
         'Op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Op
-            :states (List Dynamic) Bool
+            :states (List app.schema/GridKey) Bool
             :content String
             :data Dynamic
             :error String
