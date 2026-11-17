@@ -44,9 +44,9 @@
                 comp-typed-reel (>> states :reel) reel ({}) on-control!
           :examples $ []
           :schema $ quote $ Fn (reel.typed/State app.schema/Op app.schema/Store)
-            Fn reel.typed/Control $ -> Unit
+            Fn reel.typed/Control (-> Unit) (:features :state)
             -> respo.schema/Component
-            :features :js-ffi
+            :features :js-ffi :state
         'comp-home $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-home (content error)
             div
@@ -172,14 +172,14 @@
               true $ <> (to-lispy-string data)
                 {} $ :color :red
           :examples $ []
-          :schema $ quote $ Fn respo.schema/States Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi :state)
         'comp-edn-grid $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-edn-grid (states data)
             div
               {} $ :style $ {} (:line-height |18px) (:font-family ui/font-code) (:font-size 12)
               comp-data (>> states :root) data
           :examples $ []
-          :schema $ quote $ Fn respo.schema/States Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States Value (-> respo.schema/Component) (:generics Value) (:features :js-ffi :state)
         'comp-list $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-list (states data)
             let
@@ -216,7 +216,7 @@
                       respo.core/keyed-element idx $ div ({})
                         comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn respo.schema/States (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi :state)
         'comp-map $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-map (states data)
             let
@@ -275,7 +275,7 @@
                           -> $ List $ Tuple Dynamic respo.schema/Element
                         .concat acc pair
           :examples $ []
-          :schema $ quote $ Fn respo.schema/States (Map K V) (-> respo.schema/Component) (:generics K V) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (Map K V) (-> respo.schema/Component) (:generics K V) (:features :js-ffi :state)
         'comp-set $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-set (states data)
             div
@@ -292,7 +292,7 @@
                     respo.core/keyed-element idx $ div ({})
                       comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn respo.schema/States (Set Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (Set Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi :state)
         'comp-vector $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-vector (states data)
             let
@@ -328,7 +328,7 @@
                     map-indexed data $ fn (idx child)
                       respo.core/keyed-component idx $ comp-data (>> states idx) child
           :examples $ []
-          :schema $ quote $ Fn respo.schema/States (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/States (List Item) (-> respo.schema/Component) (:generics Item) (:features :js-ffi :state)
         'style-folded $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def style-folded
             {}
@@ -426,7 +426,7 @@
                 hint-fn $ Fn schema/Op $ -> Unit
                 dispatch! op
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require

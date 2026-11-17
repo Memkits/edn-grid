@@ -79,6 +79,7 @@ jobs:
       run: |
         set -euo pipefail
         yarn build
+        calcit --init-fn respo.render.html/make-string --reload-fn respo.render.html/make-string js
         node --test scripts/grid-regression.test.mjs
 
     - name: Check COS credentials

@@ -26,6 +26,7 @@ calcit calcit.cirru --check-only --all-defs
 calcit calcit.cirru fix --workflow strict --verify
 calcit calcit.cirru test --tag unit --require-match
 yarn build
+calcit --init-fn respo.render.html/make-string --reload-fn respo.render.html/make-string js
 node --test scripts/grid-regression.test.mjs
 yarn dev
 ```
