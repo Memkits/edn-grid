@@ -14,7 +14,7 @@ Demo http://repo.memkits.org/edn-grid/
 
 渲染入口保留传入值、列表元素、集合元素和 Map 键值各自的类型参数。开放 EDN 与存档边界仍接收原数据形状。 组件暂保留 Respo 的 `States` 别名；Calcit 0.44 对该旧值式别名提示退役，迁移与类型兼容问题见 [Respo #385](https://github.com/Respo/respo.calcit/issues/385)。
 
-直接依赖为 Reel **0.11.3**、Respo **0.19.11**、UI **0.15.5**、Feather **0.6.7** 和 JS-FFI **0.2.18**；具体版本以 `deps.cirru` 为准。
+直接依赖为 Reel **0.11.5**、Respo **0.19.13**、UI **0.15.7**、Feather **0.6.9** 和 JS-FFI **0.2.19**；具体版本以 `deps.cirru` 为准。
 
 ### Development
 
