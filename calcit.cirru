@@ -527,7 +527,7 @@
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
-                assoc store :states $ decode-map-as (respo.cursor/update-state-tree store.:states cursor s) (Map respo.schema/CoordKey Dynamic)
+                assoc store :states $ respo.cursor/update-state-map-path store.:states cursor s
               (:content t) (assoc store :content t)
               (:data d)
                 -> store
