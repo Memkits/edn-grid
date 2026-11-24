@@ -262,9 +262,7 @@
                               assert-type
                                 [] path $ div
                                   {} $ :style $ {} (:padding "|2px 4px")
-                                  or
-                                    comp-data (>> states path) child
-                                    <> $ str |Special: $ to-lispy-string child
+                                  comp-data (>> states path) child
                                 Tuple Dynamic respo.schema/Element
                       assert-type ([])
                         List $ Tuple Dynamic respo.schema/Element
@@ -438,8 +436,8 @@
     'app.schema $ %{} 'FileEntry
       :defs $ {}
         'GridKey $ %{} 'CodeEntry
-          :doc "|One EDN Grid state path segment: Tag, String, Number, or Bool, matching the keys produced by the grid's fold/edit callbacks."
-          :code $ quote $ defunion GridKey Tag String Number Bool
+          :doc "|An EDN Grid state path segment, including scalar and collection keys used by fold/edit callbacks."
+          :code $ quote $ defunion GridKey Tag String Number Bool Symbol (List GridKey) (Map GridKey GridKey) (Set GridKey)
           :examples $ []
         'Op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Op

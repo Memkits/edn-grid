@@ -97,3 +97,14 @@ test('mixed numeric, string and Tag state branches survive full grid rendering',
   assert.equal(field(field(states, 0), t.data), true);
   assert.equal(field(field(states, 'value-branch'), t.data), false);
 });
+test('a collection used as an EDN map key can contain nested foldable values', () => {
+  const key = c._$L_('nested-key', 42);
+  const data = map(key, map(t.a, 'nested-value'));
+  const html = make_string(comp_data(map(t.cursor, c._$L_()), data));
+  assert.ok(html.includes('nested-key'));
+  assert.ok(html.includes('nested-value'));
+  const cursor = c._$L_(t.root, key);
+  const op = dispatch(handler(comp_map(map(t.cursor, cursor), map(t.a, 'nested-value')), t.click));
+  const next = updater(store, op, 'fold-collection-key', 1);
+  assert.equal(field(field(field(field(next, t.states), t.root), key), t.data), true);
+});
