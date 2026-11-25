@@ -8,13 +8,13 @@ Demo http://repo.memkits.org/edn-grid/
 
 ### 使用者影响
 
-升级到正式 Calcit 和 `@calcit/procs` **0.45.0** 后，请重新安装依赖、编译并刷新。JSON/EDN 解析、错误提示、折叠与展开和 `edn-grid` Map 存档沿用原有行为。恢复存档后才注册离页保存。
+升级到正式 Calcit 和 `@calcit/procs` **0.45.1** 后，请重新安装依赖、编译并刷新。JSON/EDN 解析、错误提示、折叠与展开和 `edn-grid` Map 存档沿用原有行为。恢复存档后才注册离页保存。
 
 `Scalar` union 描述 String、Number、Tag、Symbol 和 Bool 的显示，开放 EDN 数据和异构状态路径保留，已知 nil 键限制见下文。Map 的 Bool/List 键由 Respo 的 `data-states` / `data-list->` 处理，按索引渲染的集合使用 `ChildPair`。导航操作使用具名 `Page`，存档仍保存原 Tag。折叠状态为 Bool，折叠样式使用 Respo CSS 值 union。
 
 渲染入口保留传入值、列表元素、集合元素和 Map 键值各自的类型参数。开放 EDN 与存档边界仍接收原数据形状。 组件暂保留 Respo 的 `States` 别名；Calcit 对该旧值式别名提示退役，迁移与类型兼容问题见 [Respo #385](https://github.com/Respo/respo.calcit/issues/385)。
 
-直接依赖为 Reel **0.11.8**、Respo **0.19.17**、UI **0.16.4**、Feather **0.6.12** 和 JS-FFI **0.2.23**；具体版本以 `deps.cirru` 为准。状态更新使用可保留根 Map 类型的接口，递归 GridKey 支持非 nil 标量和集合键，修复列表键下嵌套集合渲染失败；存档格式不变。集合键内部含 nil 时仍无法通过路径解码，尚未支持，见 [#44](https://github.com/Memkits/edn-grid/issues/44)。
+直接依赖为 Reel **0.11.9**、Respo **0.19.18**、UI **0.16.5**、Feather **0.6.13** 和 JS-FFI **0.2.24**；具体版本以 `deps.cirru` 为准。状态更新使用可保留根 Map 类型的接口，递归 GridKey 支持非 nil 标量和集合键，修复列表键下嵌套集合渲染失败；存档格式不变。集合键内部含 nil 时仍无法通过路径解码，尚未支持，见 [#44](https://github.com/Memkits/edn-grid/issues/44)。
 
 ### Development
 
