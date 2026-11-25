@@ -439,6 +439,7 @@
           :doc "|An EDN Grid state path segment, including scalar and collection keys used by fold/edit callbacks."
           :code $ quote $ defunion GridKey Tag String Number Bool Symbol (List GridKey) (Map GridKey GridKey) (Set GridKey)
           :examples $ []
+          :schema $ quote UnionDef
         'Op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Op
             :states (List app.schema/GridKey) Bool
